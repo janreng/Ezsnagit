@@ -22,6 +22,7 @@
 
 #include <QScrollArea>
 #include <QStatusBar>
+#include <QLabel>
 #include <QToolBar>
 #include <QMenuBar>
 #include <QMenu>
@@ -62,11 +63,29 @@ MainWindow::MainWindow(QWidget *parent)
         m_canvas->setImage(img);   // mở lại ảnh gần đây (không thêm lại vào khay)
     });
 
+    // Thanh trạng thái: vị trí con trỏ (pixel ảnh), cập nhật khi rê chuột trên canvas.
+    auto *posLabel = new QLabel(this);
+    statusBar()->addPermanentWidget(posLabel);
+    connect(m_canvas, &CanvasWidget::cursorMoved, this, [posLabel](const QPoint &p) {
+        posLabel->setText(QStringLiteral("(%1, %2)").arg(p.x()).arg(p.y()));
+    });
+
     // --- Menu Tệp ---
     QMenu *fileMenu = menuBar()->addMenu(QStringLiteral("&Tệp"));
     QAction *openAct = fileMenu->addAction(QStringLiteral("Mở…"), QKeySequence::Open, this, &MainWindow::openFile);
     QAction *saveAct = fileMenu->addAction(QStringLiteral("Lưu…"), QKeySequence::Save, this, &MainWindow::saveFile);
     QAction *expAct  = fileMenu->addAction(QStringLiteral("Xuất PNG…"), this, &MainWindow::exportPng);
+    fileMenu->addAction(QStringLiteral("Xuất JPG…"), this, [this] {
+        if (!m_canvas->hasImage()) { statusBar()->showMessage(QStringLiteral("Chưa có ảnh để xuất"), 2000); return; }
+        QString path = QFileDialog::getSaveFileName(this, QStringLiteral("Xuất JPG"),
+                                                    QStringLiteral("anh.jpg"), QStringLiteral("JPEG (*.jpg)"));
+        if (path.isEmpty()) return;
+        if (!path.endsWith(QStringLiteral(".jpg"), Qt::CaseInsensitive)) path += QStringLiteral(".jpg");
+        if (m_canvas->document().renderFlattened().save(path, "JPG", 92))
+            statusBar()->showMessage(QStringLiteral("Đã xuất %1").arg(path), 4000);
+        else
+            statusBar()->showMessage(QStringLiteral("Xuất JPG thất bại"), 3000);
+    });
     fileMenu->addSeparator();
     fileMenu->addAction(QStringLiteral("Lưu nhanh PNG"), QKeySequence(QStringLiteral("Ctrl+Shift+S")),
                         this, &MainWindow::quickSave);
@@ -128,21 +147,23 @@ MainWindow::MainWindow(QWidget *parent)
     atb->setMovable(false);
     auto *grp = new QActionGroup(this);
     grp->setExclusive(true);
-    auto addTool = [&](const QString &name, ObjType t, bool checked) {
+    auto addTool = [&](const QString &name, ObjType t, bool checked, const QString &key) {
         QAction *a = atb->addAction(name);
         a->setCheckable(true);
         a->setChecked(checked);
+        if (!key.isEmpty()) a->setShortcut(QKeySequence(key));
+        a->setToolTip(QStringLiteral("%1 (%2)").arg(name, key));
         grp->addAction(a);
         connect(a, &QAction::triggered, this, [this, t] { m_canvas->setTool(t); });
     };
-    addTool(QStringLiteral("Mũi tên"), ObjType::Arrow, true);
-    addTool(QStringLiteral("Đường"), ObjType::Line, false);
-    addTool(QStringLiteral("Khung"), ObjType::Box, false);
-    addTool(QStringLiteral("Tô sáng"), ObjType::Highlight, false);
-    addTool(QStringLiteral("Chữ"), ObjType::Text, false);
-    addTool(QStringLiteral("Số bước"), ObjType::Step, false);
-    addTool(QStringLiteral("Làm mờ"), ObjType::Blur, false);
-    addTool(QStringLiteral("Cắt"), ObjType::Crop, false);
+    addTool(QStringLiteral("Mũi tên"), ObjType::Arrow, true, QStringLiteral("A"));
+    addTool(QStringLiteral("Đường"), ObjType::Line, false, QStringLiteral("L"));
+    addTool(QStringLiteral("Khung"), ObjType::Box, false, QStringLiteral("B"));
+    addTool(QStringLiteral("Tô sáng"), ObjType::Highlight, false, QStringLiteral("H"));
+    addTool(QStringLiteral("Chữ"), ObjType::Text, false, QStringLiteral("T"));
+    addTool(QStringLiteral("Số bước"), ObjType::Step, false, QStringLiteral("S"));
+    addTool(QStringLiteral("Làm mờ"), ObjType::Blur, false, QStringLiteral("M"));
+    addTool(QStringLiteral("Cắt"), ObjType::Crop, false, QStringLiteral("C"));
     m_canvas->setTool(ObjType::Arrow);
 
     atb->addAction(QStringLiteral("Màu…"), this, [this] {

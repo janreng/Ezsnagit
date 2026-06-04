@@ -11,8 +11,8 @@
 CanvasWidget::CanvasWidget(QWidget *parent)
     : QWidget(parent)
 {
-    // Widget vẽ trực tiếp, không cần nền hệ thống.
-    setMouseTracking(false);
+    // Bật mouse-tracking để báo vị trí con trỏ ngay cả khi không giữ chuột.
+    setMouseTracking(true);
 }
 
 void CanvasWidget::setImage(const QImage &img)
@@ -101,6 +101,7 @@ void CanvasWidget::mousePressEvent(QMouseEvent *e)
 
 void CanvasWidget::mouseMoveEvent(QMouseEvent *e)
 {
+    emit cursorMoved(e->pos());   // toạ độ widget = toạ độ ảnh (1:1)
     if (!m_dragging) {
         QWidget::mouseMoveEvent(e);
         return;

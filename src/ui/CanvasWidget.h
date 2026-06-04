@@ -33,6 +33,7 @@ public:
 
 signals:
     void documentChanged(); // phát mỗi khi thêm annotation mới (để MainWindow cập nhật trạng thái)
+    void cursorMoved(const QPoint &imgPt); // vị trí con trỏ theo pixel ảnh (cho thanh trạng thái)
 
 protected:
     void paintEvent(QPaintEvent *) override;

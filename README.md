@@ -62,4 +62,9 @@ docs/specs/00-overview-architecture.md  # Kiến trúc module C++ + IA app
 
 ## Trạng thái
 
-🟡 **Giai đoạn tài liệu** — đang hoàn thiện spec + UX flow. Code app chưa bắt đầu (xem `ROADMAP.md`).
+🟢 **P0 xong** — khung CMake/Qt6 dựng được: `Ezsnagit.exe` (app shell mở cửa sổ) + module `ezsnag_core` (version/semver) + test harness headless (`test_core` 9/9 pass) + per-monitor DPI awareness. Tiếp theo: **P1 — Capture nền** (xem `ROADMAP.md`).
+
+### Build
+```
+build.bat        REM Qt6.8.3 MinGW ở C:\Qt (giống Ezcel)
+```

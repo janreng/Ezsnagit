@@ -40,6 +40,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QClipboard>
+#include <QPainter>
 
 using canvas::ObjType;
 
@@ -130,6 +131,18 @@ MainWindow::MainWindow(QWidget *parent)
         if (m_canvas->hasImage())
             m_canvas->setImage(effects::roundCorners(m_canvas->document().renderFlattened(), 16));
     });
+    fxMenu->addAction(QStringLiteral("Nền màu (xoá trong suốt)…"), this, [this] {
+        if (!m_canvas->hasImage()) return;
+        const QColor c = QColorDialog::getColor(Qt::white, this, QStringLiteral("Màu nền"));
+        if (!c.isValid()) return;
+        const QImage cur = m_canvas->document().renderFlattened();
+        QImage out(cur.size(), QImage::Format_ARGB32);
+        out.fill(c);
+        QPainter p(&out);
+        p.drawImage(0, 0, cur);
+        p.end();
+        m_canvas->setImage(out);
+    });
     fxMenu->addSeparator();
     fxMenu->addAction(QStringLiteral("Đổi kích thước…"), this, [this] {
         if (!m_canvas->hasImage()) return;
@@ -155,12 +168,12 @@ MainWindow::MainWindow(QWidget *parent)
     // --- Toolbar chụp ---
     auto *tb = addToolBar(QStringLiteral("Chụp"));
     tb->setMovable(false);
-    tb->addAction(QStringLiteral("Chụp vùng"), QKeySequence(QStringLiteral("Ctrl+Shift+A")),
-                  this, &MainWindow::captureRegion);
-    tb->addAction(QStringLiteral("Chụp cửa sổ"), QKeySequence(QStringLiteral("Ctrl+Shift+W")),
-                  this, &MainWindow::captureWindow);
-    tb->addAction(QStringLiteral("Chụp toàn màn hình"), QKeySequence(QStringLiteral("Ctrl+Shift+F")),
-                  this, &MainWindow::captureFullScreen);
+    QAction *aReg = tb->addAction(QStringLiteral("Chụp vùng"), this, &MainWindow::captureRegion);
+    aReg->setShortcuts({ QKeySequence(QStringLiteral("Ctrl+Shift+A")), QKeySequence(QStringLiteral("Ctrl+1")) });
+    QAction *aWin = tb->addAction(QStringLiteral("Chụp cửa sổ"), this, &MainWindow::captureWindow);
+    aWin->setShortcuts({ QKeySequence(QStringLiteral("Ctrl+Shift+W")), QKeySequence(QStringLiteral("Ctrl+2")) });
+    QAction *aFull = tb->addAction(QStringLiteral("Chụp toàn màn hình"), this, &MainWindow::captureFullScreen);
+    aFull->setShortcuts({ QKeySequence(QStringLiteral("Ctrl+Shift+F")), QKeySequence(QStringLiteral("Ctrl+3")) });
     tb->addAction(QStringLiteral("Chụp ghép dọc"), this, &MainWindow::captureScrolling);
     tb->addAction(QStringLiteral("Chụp sau 3 giây"), this, [this] {
         statusBar()->showMessage(QStringLiteral("Sẽ chụp toàn màn hình sau 3 giây…"), 3000);

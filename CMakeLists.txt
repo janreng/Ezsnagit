@@ -61,7 +61,8 @@ add_library(ezsnag_effects STATIC
     src/effects/Transforms.cpp src/effects/Transforms.h
     src/effects/Blur.cpp src/effects/Blur.h
     src/effects/Filters.cpp src/effects/Filters.h
-    src/effects/Frame.cpp src/effects/Frame.h)
+    src/effects/Frame.cpp src/effects/Frame.h
+    src/effects/RoundedCorners.cpp src/effects/RoundedCorners.h)
 target_include_directories(ezsnag_effects PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_effects PUBLIC Qt6::Core Qt6::Gui)
 
@@ -77,6 +78,7 @@ qt_add_executable(Ezsnagit WIN32
     src/ui/PenWidthPicker.cpp src/ui/PenWidthPicker.h
     src/ui/PanoramicDialog.cpp src/ui/PanoramicDialog.h
     src/ui/RecentTray.cpp src/ui/RecentTray.h
+    src/ui/PreferencesDialog.cpp src/ui/PreferencesDialog.h
     resources.qrc
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -124,6 +126,10 @@ add_test(NAME filters COMMAND test_filters)
 add_executable(test_frame tests/test_frame.cpp)
 target_link_libraries(test_frame PRIVATE ezsnag_effects Qt6::Core Qt6::Gui)
 add_test(NAME frame COMMAND test_frame)
+
+add_executable(test_rounded tests/test_rounded.cpp)
+target_link_libraries(test_rounded PRIVATE ezsnag_effects Qt6::Core Qt6::Gui)
+add_test(NAME rounded COMMAND test_rounded)
 
 add_executable(test_stitch tests/test_stitch.cpp)
 target_link_libraries(test_stitch PRIVATE ezsnag_capture Qt6::Core Qt6::Gui)

@@ -15,7 +15,9 @@
 #include "effects/Transforms.h"
 #include "effects/Filters.h"
 #include "effects/Frame.h"
+#include "effects/RoundedCorners.h"
 #include "ui/PenWidthPicker.h"
+#include "ui/PreferencesDialog.h"
 #include "canvas/EzsnagxFile.h"
 
 #include <QScrollArea>
@@ -76,6 +78,10 @@ MainWindow::MainWindow(QWidget *parent)
             statusBar()->showMessage(QStringLiteral("Thư mục lưu mặc định: %1").arg(dir), 3000);
         }
     });
+    fileMenu->addSeparator();
+    fileMenu->addAction(QStringLiteral("Thiết lập…"), this, [this] {
+        PreferencesDialog(this).exec();
+    });
     Q_UNUSED(openAct); Q_UNUSED(saveAct); Q_UNUSED(expAct);
 
     // --- Menu Hiệu ứng (áp lên ảnh đã gộp annotation) ---
@@ -97,6 +103,10 @@ MainWindow::MainWindow(QWidget *parent)
         if (m_canvas->hasImage())
             m_canvas->setImage(effects::dropShadow(m_canvas->document().renderFlattened()));
     });
+    fxMenu->addAction(QStringLiteral("Bo góc"), this, [this] {
+        if (m_canvas->hasImage())
+            m_canvas->setImage(effects::roundCorners(m_canvas->document().renderFlattened(), 16));
+    });
 
     // --- Toolbar chụp ---
     auto *tb = addToolBar(QStringLiteral("Chụp"));
@@ -108,6 +118,10 @@ MainWindow::MainWindow(QWidget *parent)
     tb->addAction(QStringLiteral("Chụp toàn màn hình"), QKeySequence(QStringLiteral("Ctrl+Shift+F")),
                   this, &MainWindow::captureFullScreen);
     tb->addAction(QStringLiteral("Chụp ghép dọc"), this, &MainWindow::captureScrolling);
+    tb->addAction(QStringLiteral("Chụp sau 3 giây"), this, [this] {
+        statusBar()->showMessage(QStringLiteral("Sẽ chụp toàn màn hình sau 3 giây…"), 3000);
+        QTimer::singleShot(3000, this, &MainWindow::captureFullScreen);
+    });
 
     // --- Toolbar annotation ---
     auto *atb = addToolBar(QStringLiteral("Chú thích"));

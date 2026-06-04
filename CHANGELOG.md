@@ -1,5 +1,10 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.8.0
+- **Khay ảnh gần đây**: xem lại và mở nhanh các ảnh vừa chụp.
+- **Lưu nhanh PNG** (Ctrl+Shift+S): lưu thẳng vào thư mục mặc định với tên tự đánh số.
+- Đặt **thư mục lưu mặc định** theo ý bạn.
+
 ## v0.7.0
 - **Chụp ghép dọc**: chụp lần lượt nhiều khung (cuộn nội dung giữa các lần) rồi tự nối thành một ảnh dài — tiện chụp trang web/đoạn chat dài.
 

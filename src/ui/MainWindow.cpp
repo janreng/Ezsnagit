@@ -3,6 +3,8 @@
 #include "ui/WindowPickerOverlay.h"
 #include "core/Version.h"
 #include "capture/ScreenCapture.h"
+#include "hotkey/GlobalHotkey.h"
+#include "share/ImageClipboard.h"
 
 #include <QLabel>
 #include <QScrollArea>
@@ -35,6 +37,18 @@ MainWindow::MainWindow(QWidget *parent)
     QAction *capAct = tb->addAction(QStringLiteral("Chụp toàn màn hình"));
     capAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+F")));
     connect(capAct, &QAction::triggered, this, &MainWindow::captureFullScreen);
+
+    tb->addSeparator();
+    QAction *copyAct = tb->addAction(QStringLiteral("Sao chép"));
+    copyAct->setShortcut(QKeySequence::Copy);   // Ctrl+C
+    connect(copyAct, &QAction::triggered, this, &MainWindow::copyToClipboard);
+
+    // Phím tắt TOÀN CỤC: Print Screen -> chụp vùng (kể cả khi app ở nền).
+    m_hotkey = new hotkey::GlobalHotkey(this);
+    if (m_hotkey->registerHotkey(1, Qt::NoModifier, Qt::Key_Print))
+        connect(m_hotkey, &hotkey::GlobalHotkey::activated, this, [this](int id) {
+            if (id == 1) captureRegion();
+        });
 
     // Canvas = QLabel trong QScrollArea (placeholder cho editor canvas sau này).
     m_canvas = new QLabel(this);
@@ -140,8 +154,21 @@ void MainWindow::captureWindow()
 
 void MainWindow::showCaptured(const QImage &img)
 {
+    m_lastImage = img;
     m_canvas->setPixmap(QPixmap::fromImage(img));
     m_canvas->resize(img.size());
+    // Tự copy vào clipboard ngay (enabler bug-report loop: chụp -> dán).
+    share::copyImageToClipboard(img);
     statusBar()->showMessage(
-        QStringLiteral("Đã chụp %1 × %2 px").arg(img.width()).arg(img.height()), 5000);
+        QStringLiteral("Đã chụp %1 × %2 px — đã copy vào clipboard").arg(img.width()).arg(img.height()), 5000);
+}
+
+void MainWindow::copyToClipboard()
+{
+    if (m_lastImage.isNull()) {
+        statusBar()->showMessage(QStringLiteral("Chưa có ảnh để sao chép"), 2000);
+        return;
+    }
+    if (share::copyImageToClipboard(m_lastImage))
+        statusBar()->showMessage(QStringLiteral("Đã sao chép ảnh vào clipboard"), 2000);
 }

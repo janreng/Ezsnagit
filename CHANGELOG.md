@@ -1,5 +1,10 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.9.0
+- Hiệu ứng **Bo góc** ảnh.
+- Hộp thoại **Thiết lập**: bật/tắt tự copy clipboard, chọn thư mục lưu mặc định.
+- **Chụp sau 3 giây** (hẹn giờ) — kịp mở menu/tooltip rồi mới chụp.
+
 ## v0.8.0
 - **Khay ảnh gần đây**: xem lại và mở nhanh các ảnh vừa chụp.
 - **Lưu nhanh PNG** (Ctrl+Shift+S): lưu thẳng vào thư mục mặc định với tên tự đánh số.

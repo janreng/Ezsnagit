@@ -202,6 +202,10 @@ MainWindow::MainWindow(QWidget *parent)
     atb->addAction(QStringLiteral("Hoàn tác"), QKeySequence::Undo, this, [this] { m_canvas->undo(); });
     atb->addAction(QStringLiteral("Làm lại"), QKeySequence::Redo, this, [this] { m_canvas->redo(); });
     atb->addSeparator();
+    atb->addAction(QStringLiteral("Xoay trái"), this, [this] {
+        if (m_canvas->hasImage())
+            m_canvas->setImage(effects::rotate90(m_canvas->document().renderFlattened(), false));
+    });
     atb->addAction(QStringLiteral("Xoay phải"), this, &MainWindow::rotateRight);
     atb->addAction(QStringLiteral("Lật ngang"), this, &MainWindow::flipHorizontal);
     atb->addAction(QStringLiteral("Sao chép"), QKeySequence::Copy, this, &MainWindow::copyToClipboard);

@@ -8,6 +8,7 @@
 #include "capture/StitchMany.h"
 #include "canvas/QuickStyle.h"
 #include "core/Settings.h"
+#include "ocr/Ocr.h"
 #include "core/Version.h"
 #include "capture/ScreenCapture.h"
 #include "hotkey/GlobalHotkey.h"
@@ -38,6 +39,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QClipboard>
 
 using canvas::ObjType;
 
@@ -203,6 +205,22 @@ MainWindow::MainWindow(QWidget *parent)
     atb->addAction(QStringLiteral("Xoay phải"), this, &MainWindow::rotateRight);
     atb->addAction(QStringLiteral("Lật ngang"), this, &MainWindow::flipHorizontal);
     atb->addAction(QStringLiteral("Sao chép"), QKeySequence::Copy, this, &MainWindow::copyToClipboard);
+    atb->addAction(QStringLiteral("Lấy chữ (OCR)"), this, [this] {
+        if (!m_canvas->hasImage()) { statusBar()->showMessage(QStringLiteral("Chưa có ảnh"), 2000); return; }
+        if (!ocr::isAvailable()) {
+            QMessageBox::information(this, QStringLiteral("Lấy chữ (OCR)"),
+                QStringLiteral("Chưa cài Tesseract OCR.\nCài Tesseract rồi mở lại app để dùng tính năng này."));
+            return;
+        }
+        statusBar()->showMessage(QStringLiteral("Đang nhận dạng chữ…"));
+        const QString text = ocr::grabText(m_canvas->document().renderFlattened());
+        if (text.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không nhận được chữ"), 3000); return; }
+        QGuiApplication::clipboard()->setText(text);
+        statusBar()->showMessage(QStringLiteral("Đã lấy chữ và copy vào clipboard"), 4000);
+        bool ok = false;
+        QInputDialog::getMultiLineText(this, QStringLiteral("Chữ nhận dạng được (đã copy)"),
+                                       QStringLiteral("Nội dung:"), text, &ok);
+    });
 
     // --- Thanh Quick Styles (preset nhanh: 1 click đổi tool+màu+nét) ---
     addToolBarBreak();

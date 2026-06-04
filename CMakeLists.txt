@@ -48,6 +48,11 @@ add_library(ezsnag_share STATIC src/share/ImageClipboard.cpp src/share/ImageClip
 target_include_directories(ezsnag_share PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_share PUBLIC Qt6::Core Qt6::Gui)
 
+# --- OCR: lấy chữ từ ảnh qua Tesseract CLI (graceful nếu chưa cài) -> static lib.
+add_library(ezsnag_ocr STATIC src/ocr/Ocr.cpp src/ocr/Ocr.h)
+target_include_directories(ezsnag_ocr PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(ezsnag_ocr PUBLIC Qt6::Core Qt6::Gui)
+
 # --- Canvas: document model editor (object graph vector + undo/redo + .ezsnagx) -> static lib.
 add_library(ezsnag_canvas STATIC
     src/canvas/CanvasDocument.cpp src/canvas/CanvasDocument.h src/canvas/AnnotationObject.h
@@ -83,7 +88,7 @@ qt_add_executable(Ezsnagit WIN32
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(Ezsnagit PRIVATE EZSNAGIT_VERSION="${PROJECT_VERSION}")
-target_link_libraries(Ezsnagit PRIVATE ezsnag_core ezsnag_capture ezsnag_hotkey ezsnag_share ezsnag_effects ezsnag_canvas Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(Ezsnagit PRIVATE ezsnag_core ezsnag_capture ezsnag_hotkey ezsnag_share ezsnag_ocr ezsnag_effects ezsnag_canvas Qt6::Core Qt6::Gui Qt6::Widgets)
 
 # --- Tests (console, headless) ---
 enable_testing()
@@ -106,6 +111,10 @@ add_test(NAME monitormap COMMAND test_monitormap)
 add_executable(test_share tests/test_share.cpp)
 target_link_libraries(test_share PRIVATE ezsnag_share Qt6::Core Qt6::Gui)
 add_test(NAME share COMMAND test_share)
+
+add_executable(test_ocr tests/test_ocr.cpp)
+target_link_libraries(test_ocr PRIVATE ezsnag_ocr Qt6::Core Qt6::Gui)
+add_test(NAME ocr COMMAND test_ocr)
 
 add_executable(test_canvas tests/test_canvas.cpp)
 target_link_libraries(test_canvas PRIVATE ezsnag_canvas Qt6::Core Qt6::Gui)

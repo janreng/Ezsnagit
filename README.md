@@ -6,6 +6,18 @@ Xây bằng **C++ / Qt6** (đồng bộ stack với dự án Ezcel để tái d�
 > Tên nội bộ: **Ezsnagit**. Mục tiêu: tái tạo trải nghiệm Snagit (Capture → Editor → Library → Share)
 > ở mức tính năng cốt lõi trước, mở rộng dần theo roadmap.
 
+## Định vị (vì sao làm bản clone này)
+
+Research cộng đồng/đối thủ chỉ ra: điểm yếu lớn nhất của Snagit **không phải thiếu tính năng** mà là
+**mô hình bản quyền + footprint** (chuyển sang subscription + thu hồi license, nặng ~420MB, khởi động chậm,
+DPI/đa màn hình sai, ép đăng nhập online, mất Library sau update). Ezsnagit nhắm đúng khe hở đó:
+
+> **Sở hữu vĩnh viễn · không subscription · chạy offline · nhẹ & nhanh.**
+
+Đây là kim chỉ nam, không chỉ là khẩu hiệu — xem các target đo được ở `docs/specs/12-non-functional-requirements.md`
+(cold start < 1s, base install < 60MB, DPI/đa màn hình đúng ngày-một, Library backup an toàn). Ngoài ra nhắm tới
+khe "UX kiểu CleanShot + automation kiểu ShareX" mà thị trường đang để trống (xem `docs/research/07-competitors.md`).
+
 ## Ezsnagit là gì
 
 Một ứng dụng desktop gồm 3 bề mặt chính, giống Snagit:

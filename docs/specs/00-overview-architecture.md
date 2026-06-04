@@ -80,6 +80,16 @@ Mỗi module là một static lib Qt, **logic thuần tách khỏi GUI** để t
 
 ---
 
+## 3b. Technical precedents (study — KHÔNG copy code)
+
+Các project có sẵn giải đúng những cơ chế Ezsnagit cần. Tham khảo pattern, **không copy mã** (lưu ý GPL):
+
+- **Flameshot** (C++/Qt, GPL) — *tiền lệ kỹ thuật quan trọng nhất*, cùng stack. Học: overlay fullscreen trong suốt để chọn vùng, xử lý **đa màn hình**, vẽ annotation bằng QPainter/Qt, global hotkey, system tray. (research 07 §4)
+- **ShareX** (C#, GPL) — học hành vi **stitch scrolling** và **after-capture task chain / upload pipeline** (kiến trúc destination pluggable). (research 07 §1)
+- **Greenshot** (C#, GPL) — UX **destination picker** nhẹ.
+
+⚠️ GPL: chỉ đọc để hiểu cách tiếp cận; Ezsnagit tự viết. Không nhúng code GPL.
+
 ## 4. Ranh giới clone (điều chỉnh kỳ vọng)
 
 - **Làm tới**: capture ảnh + editor annotation + effects + library + share file/clipboard + OCR + scrolling + video trim/GIF cơ bản.

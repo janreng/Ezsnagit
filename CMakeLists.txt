@@ -21,6 +21,16 @@ add_library(ezsnag_core STATIC
 target_include_directories(ezsnag_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_core PUBLIC Qt6::Core)
 
+# --- Capture: chụp màn hình (geometry thuần + lớp platform GDI) -> static lib.
+add_library(ezsnag_capture STATIC
+    src/capture/ScreenGeometry.cpp src/capture/ScreenGeometry.h
+    src/capture/ScreenCapture.cpp src/capture/ScreenCapture.h)
+target_include_directories(ezsnag_capture PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(ezsnag_capture PUBLIC Qt6::Core Qt6::Gui)
+if(WIN32)
+    target_link_libraries(ezsnag_capture PUBLIC gdi32 user32)
+endif()
+
 # --- App GUI (shell P0; các module capture/canvas/... thêm dần theo roadmap) ---
 qt_add_executable(Ezsnagit WIN32
     src/main.cpp
@@ -29,10 +39,14 @@ qt_add_executable(Ezsnagit WIN32
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(Ezsnagit PRIVATE EZSNAGIT_VERSION="${PROJECT_VERSION}")
-target_link_libraries(Ezsnagit PRIVATE ezsnag_core Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(Ezsnagit PRIVATE ezsnag_core ezsnag_capture Qt6::Core Qt6::Gui Qt6::Widgets)
 
 # --- Tests (console, headless) ---
 enable_testing()
 add_executable(test_core tests/test_core.cpp)
 target_link_libraries(test_core PRIVATE ezsnag_core Qt6::Core)
 add_test(NAME core COMMAND test_core)
+
+add_executable(test_capture tests/test_capture.cpp)
+target_link_libraries(test_capture PRIVATE ezsnag_capture Qt6::Core Qt6::Gui)
+add_test(NAME capture COMMAND test_capture)

@@ -1,25 +1,66 @@
 #include "ui/MainWindow.h"
 #include "core/Version.h"
+#include "capture/ScreenCapture.h"
+
 #include <QLabel>
+#include <QScrollArea>
 #include <QStatusBar>
-#include <QVBoxLayout>
-#include <QWidget>
+#include <QToolBar>
+#include <QAction>
+#include <QPixmap>
+#include <QImage>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle(QStringLiteral("Ezsnagit"));
-    resize(900, 600);
+    resize(1000, 680);
 
-    // P0: chỉ là khung. Một label giữa màn báo app đã chạy + version.
-    auto *central = new QWidget(this);
-    auto *layout = new QVBoxLayout(central);
-    auto *label = new QLabel(
-        QStringLiteral("Ezsnagit %1\nClone Snagit — khung P0").arg(core::appVersion()),
-        central);
-    label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label);
-    setCentralWidget(central);
+    // Thanh công cụ tối giản (P1): chụp toàn màn hình.
+    auto *tb = addToolBar(QStringLiteral("Capture"));
+    tb->setMovable(false);
+    QAction *capAct = tb->addAction(QStringLiteral("Chụp toàn màn hình"));
+    capAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+F")));
+    connect(capAct, &QAction::triggered, this, &MainWindow::captureFullScreen);
 
-    statusBar()->showMessage(QStringLiteral("Sẵn sàng — khung P0"));
+    // Canvas = QLabel trong QScrollArea (placeholder cho editor canvas sau này).
+    m_canvas = new QLabel(this);
+    m_canvas->setAlignment(Qt::AlignCenter);
+    m_canvas->setText(QStringLiteral("Ezsnagit %1\nBấm \"Chụp toàn màn hình\" (Ctrl+Shift+F)")
+                          .arg(core::appVersion()));
+    m_scroll = new QScrollArea(this);
+    m_scroll->setWidget(m_canvas);
+    // resizable=false: canvas giữ kích thước thật của ảnh chụp -> có scrollbar khi ảnh lớn
+    // hơn viewport (xem ảnh full-size). Nội dung nhỏ (text placeholder) được căn giữa.
+    m_scroll->setWidgetResizable(false);
+    m_scroll->setAlignment(Qt::AlignCenter);
+    setCentralWidget(m_scroll);
+
+    statusBar()->showMessage(QStringLiteral("Sẵn sàng"));
+}
+
+void MainWindow::captureFullScreen()
+{
+    // Ẩn cửa sổ app để không tự chụp chính nó, đợi một nhịp cho redraw rồi chụp.
+    hide();
+    QTimer::singleShot(200, this, [this] {
+        const QImage img = capture::captureVirtualDesktop();
+        show();
+        raise();
+        activateWindow();
+        if (img.isNull()) {
+            statusBar()->showMessage(QStringLiteral("Chụp thất bại (nền tảng chưa hỗ trợ?)"), 4000);
+            return;
+        }
+        showCaptured(img);
+    });
+}
+
+void MainWindow::showCaptured(const QImage &img)
+{
+    m_canvas->setPixmap(QPixmap::fromImage(img));
+    m_canvas->resize(img.size());
+    statusBar()->showMessage(
+        QStringLiteral("Đã chụp %1 × %2 px").arg(img.width()).arg(img.height()), 5000);
 }

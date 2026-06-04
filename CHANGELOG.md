@@ -1,5 +1,9 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.9.2
+- **Đổi kích thước ảnh** (nhập chiều rộng/cao).
+- Menu **Trợ giúp** + hộp thoại **Giới thiệu** (xem phiên bản).
+
 ## v0.9.1
 - **Phím tắt** chọn công cụ chú thích: A (mũi tên), L (đường), B (khung), H (tô sáng), T (chữ), S (số bước), M (làm mờ), C (cắt).
 - **Xuất JPG** (ngoài PNG).

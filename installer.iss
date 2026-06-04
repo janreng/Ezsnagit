@@ -3,7 +3,7 @@
 
 #define MyAppName "Ezsnagit"
 #ifndef MyAppVersion
-  #define MyAppVersion "0.9.1"
+  #define MyAppVersion "0.9.2"
 #endif
 #define MyAppPublisher "Ez"
 #define MyAppExeName "Ezsnagit.exe"

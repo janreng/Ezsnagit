@@ -1,5 +1,10 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.9.3
+- Nút **Xoay trái** (cân với Xoay phải).
+- **Nền màu**: thay vùng trong suốt bằng màu chọn (tiện xuất JPG).
+- Phím tắt chụp: **Ctrl+1** (vùng), **Ctrl+2** (cửa sổ), **Ctrl+3** (toàn màn hình).
+
 ## v0.9.2
 - **Đổi kích thước ảnh** (nhập chiều rộng/cao).
 - Menu **Trợ giúp** + hộp thoại **Giới thiệu** (xem phiên bản).

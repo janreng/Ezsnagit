@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezsnagit VERSION 0.9.2 LANGUAGES CXX)
+project(Ezsnagit VERSION 0.9.3 LANGUAGES CXX)
 
 # Ezsnagit — phần mềm chụp & chú thích màn hình, C++/Qt6 (Windows-first, MinGW).
 # Kiến trúc: static lib per module (xem docs/specs/00-overview-architecture.md).

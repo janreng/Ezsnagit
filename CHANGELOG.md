@@ -1,5 +1,10 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.5.0
+- **Kính lúp** khi chọn vùng chụp — phóng to từng pixel để chọn cực chính xác.
+- Công cụ **Cắt ảnh** (Crop): kéo chọn vùng cần giữ.
+- **Hiệu ứng màu**: Trắng đen, Sepia, Đảo màu.
+
 ## v0.4.0
 - Thêm công cụ chú thích: **đường thẳng**, **số bước** (badge 1, 2, 3… cho hướng dẫn từng bước), **làm mờ** vùng nhạy cảm (che thông tin riêng tư).
 - **Thanh Style nhanh**: một cú nhấp đổi sẵn kiểu + màu + độ dày nét.

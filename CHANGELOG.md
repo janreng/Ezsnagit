@@ -1,5 +1,9 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.4.0
+- Thêm công cụ chú thích: **đường thẳng**, **số bước** (badge 1, 2, 3… cho hướng dẫn từng bước), **làm mờ** vùng nhạy cảm (che thông tin riêng tư).
+- **Thanh Style nhanh**: một cú nhấp đổi sẵn kiểu + màu + độ dày nét.
+
 ## v0.3.0
 - **Trình biên tập ảnh**: vẽ **mũi tên, khung, tô sáng, chèn chữ** lên ảnh vừa chụp.
 - **Hoàn tác / Làm lại** và **đổi màu** chú thích.

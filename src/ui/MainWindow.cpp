@@ -36,6 +36,8 @@
 #include <QColorDialog>
 #include <QDockWidget>
 #include <QDir>
+#include <QMessageBox>
+#include <QInputDialog>
 
 using canvas::ObjType;
 
@@ -125,6 +127,27 @@ MainWindow::MainWindow(QWidget *parent)
     fxMenu->addAction(QStringLiteral("Bo góc"), this, [this] {
         if (m_canvas->hasImage())
             m_canvas->setImage(effects::roundCorners(m_canvas->document().renderFlattened(), 16));
+    });
+    fxMenu->addSeparator();
+    fxMenu->addAction(QStringLiteral("Đổi kích thước…"), this, [this] {
+        if (!m_canvas->hasImage()) return;
+        const QImage cur = m_canvas->document().renderFlattened();
+        bool ok = false;
+        const int w = QInputDialog::getInt(this, QStringLiteral("Đổi kích thước"),
+                                           QStringLiteral("Chiều rộng (px):"), cur.width(), 1, 20000, 1, &ok);
+        if (!ok) return;
+        const int h = QInputDialog::getInt(this, QStringLiteral("Đổi kích thước"),
+                                           QStringLiteral("Chiều cao (px):"), cur.height(), 1, 20000, 1, &ok);
+        if (!ok) return;
+        m_canvas->setImage(effects::scaledTo(cur, QSize(w, h)));
+    });
+
+    // --- Menu Trợ giúp ---
+    QMenu *helpMenu = menuBar()->addMenu(QStringLiteral("Trợ &giúp"));
+    helpMenu->addAction(QStringLiteral("Giới thiệu Ezsnagit…"), this, [this] {
+        QMessageBox::about(this, QStringLiteral("Giới thiệu Ezsnagit"),
+            QStringLiteral("<b>Ezsnagit %1</b><br>Phần mềm chụp & chú thích màn hình.<br>"
+                           "Miễn phí · chạy offline · nhẹ.").arg(core::appVersion()));
     });
 
     // --- Toolbar chụp ---

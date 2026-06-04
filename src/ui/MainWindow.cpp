@@ -10,6 +10,8 @@
 #include "share/ImageClipboard.h"
 #include "effects/Transforms.h"
 #include "effects/Filters.h"
+#include "effects/Frame.h"
+#include "ui/PenWidthPicker.h"
 #include "canvas/EzsnagxFile.h"
 
 #include <QScrollArea>
@@ -58,6 +60,16 @@ MainWindow::MainWindow(QWidget *parent)
     fxMenu->addAction(QStringLiteral("Trắng đen"), this, [applyFilter] { applyFilter(effects::grayscale); });
     fxMenu->addAction(QStringLiteral("Sepia"),     this, [applyFilter] { applyFilter(effects::sepia); });
     fxMenu->addAction(QStringLiteral("Đảo màu"),   this, [applyFilter] { applyFilter(effects::invert); });
+    fxMenu->addSeparator();
+    fxMenu->addAction(QStringLiteral("Cắt viền thừa"), this, [applyFilter] { applyFilter(effects::autoTrim); });
+    fxMenu->addAction(QStringLiteral("Thêm viền"), this, [this] {
+        if (m_canvas->hasImage())
+            m_canvas->setImage(effects::addBorder(m_canvas->document().renderFlattened(), 6, QColor(40, 40, 40)));
+    });
+    fxMenu->addAction(QStringLiteral("Đổ bóng"), this, [this] {
+        if (m_canvas->hasImage())
+            m_canvas->setImage(effects::dropShadow(m_canvas->document().renderFlattened()));
+    });
 
     // --- Toolbar chụp ---
     auto *tb = addToolBar(QStringLiteral("Chụp"));
@@ -95,6 +107,9 @@ MainWindow::MainWindow(QWidget *parent)
         const QColor c = QColorDialog::getColor(QColor(220, 30, 30), this, QStringLiteral("Chọn màu"));
         if (c.isValid()) m_canvas->setColor(c);
     });
+    auto *penPicker = new PenWidthPicker(atb);
+    connect(penPicker, &PenWidthPicker::widthChanged, this, [this](int w) { m_canvas->setPenWidth(w); });
+    atb->addWidget(penPicker);
     atb->addSeparator();
     atb->addAction(QStringLiteral("Hoàn tác"), QKeySequence::Undo, this, [this] { m_canvas->undo(); });
     atb->addAction(QStringLiteral("Làm lại"), QKeySequence::Redo, this, [this] { m_canvas->redo(); });

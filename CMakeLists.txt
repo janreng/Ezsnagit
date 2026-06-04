@@ -25,7 +25,8 @@ target_link_libraries(ezsnag_core PUBLIC Qt6::Core)
 add_library(ezsnag_capture STATIC
     src/capture/ScreenGeometry.cpp src/capture/ScreenGeometry.h
     src/capture/ScreenCapture.cpp src/capture/ScreenCapture.h
-    src/capture/MonitorMap.cpp src/capture/MonitorMap.h)
+    src/capture/MonitorMap.cpp src/capture/MonitorMap.h
+    src/capture/Stitch.cpp src/capture/Stitch.h)
 target_include_directories(ezsnag_capture PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_capture PUBLIC Qt6::Core Qt6::Gui)
 if(WIN32)
@@ -57,7 +58,8 @@ target_link_libraries(ezsnag_canvas PUBLIC Qt6::Core Qt6::Gui)
 add_library(ezsnag_effects STATIC
     src/effects/Transforms.cpp src/effects/Transforms.h
     src/effects/Blur.cpp src/effects/Blur.h
-    src/effects/Filters.cpp src/effects/Filters.h)
+    src/effects/Filters.cpp src/effects/Filters.h
+    src/effects/Frame.cpp src/effects/Frame.h)
 target_include_directories(ezsnag_effects PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_effects PUBLIC Qt6::Core Qt6::Gui)
 
@@ -70,6 +72,7 @@ qt_add_executable(Ezsnagit WIN32
     src/ui/Magnifier.cpp src/ui/Magnifier.h
     src/ui/CanvasWidget.cpp src/ui/CanvasWidget.h
     src/ui/StyleBar.cpp src/ui/StyleBar.h
+    src/ui/PenWidthPicker.cpp src/ui/PenWidthPicker.h
     resources.qrc
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -109,6 +112,14 @@ add_test(NAME blur COMMAND test_blur)
 add_executable(test_filters tests/test_filters.cpp)
 target_link_libraries(test_filters PRIVATE ezsnag_effects Qt6::Core Qt6::Gui)
 add_test(NAME filters COMMAND test_filters)
+
+add_executable(test_frame tests/test_frame.cpp)
+target_link_libraries(test_frame PRIVATE ezsnag_effects Qt6::Core Qt6::Gui)
+add_test(NAME frame COMMAND test_frame)
+
+add_executable(test_stitch tests/test_stitch.cpp)
+target_link_libraries(test_stitch PRIVATE ezsnag_capture Qt6::Core Qt6::Gui)
+add_test(NAME stitch COMMAND test_stitch)
 
 add_executable(test_ezsnagx tests/test_ezsnagx.cpp)
 target_link_libraries(test_ezsnagx PRIVATE ezsnag_canvas Qt6::Core Qt6::Gui)

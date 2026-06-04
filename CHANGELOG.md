@@ -1,5 +1,10 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.9.1
+- **Phím tắt** chọn công cụ chú thích: A (mũi tên), L (đường), B (khung), H (tô sáng), T (chữ), S (số bước), M (làm mờ), C (cắt).
+- **Xuất JPG** (ngoài PNG).
+- Thanh trạng thái hiện **toạ độ con trỏ** trên ảnh.
+
 ## v0.9.0
 - Hiệu ứng **Bo góc** ảnh.
 - Hộp thoại **Thiết lập**: bật/tắt tự copy clipboard, chọn thư mục lưu mặc định.

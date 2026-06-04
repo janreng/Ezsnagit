@@ -26,11 +26,13 @@ protected:
     void mouseMoveEvent(QMouseEvent *) override;
     void mouseReleaseEvent(QMouseEvent *) override;
     void keyPressEvent(QKeyEvent *) override;
+    void closeEvent(QCloseEvent *) override;   // đảm bảo luôn phát 1 tín hiệu
 
 private:
     QRect selectionWidgetRect() const; // vùng chọn theo toạ độ widget (chuẩn hoá)
 
     QImage m_frozen;
     bool m_selecting = false;
+    bool m_done = false;               // đã phát regionSelected/cancelled chưa
     QPoint m_start, m_cur;
 };

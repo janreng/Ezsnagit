@@ -64,6 +64,19 @@ int main() {
         ok(capture::mapWidgetRectToImage(QRect(0,0,10,10), QSize(), QSize(100,100)).isEmpty(), "map widget rong -> rong");
     }
 
+    // mapWidgetPointToImage: dpr=2 -> nhân đôi.
+    {
+        QPoint p = capture::mapWidgetPointToImage(QPoint(50,30), QSize(800,600), QSize(1600,1200));
+        ok(p == QPoint(100,60), "map point dpr=2");
+    }
+    // topWindowAt: cửa sổ trên cùng (đầu danh sách) thắng khi chồng nhau.
+    {
+        QVector<QRect> wins{ QRect(0,0,200,200), QRect(100,100,200,200) }; // front -> back
+        ok(capture::topWindowAt(wins, QPoint(150,150)) == 0, "top window: front thang khi chong");
+        ok(capture::topWindowAt(wins, QPoint(250,250)) == 1, "top window: chi cua so sau chua diem");
+        ok(capture::topWindowAt(wins, QPoint(500,500)) == -1, "top window: ngoai het -> -1");
+    }
+
     std::printf("test_capture: %d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

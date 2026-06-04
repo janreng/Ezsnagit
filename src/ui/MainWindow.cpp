@@ -1,5 +1,6 @@
 #include "ui/MainWindow.h"
 #include "ui/RegionOverlay.h"
+#include "ui/WindowPickerOverlay.h"
 #include "core/Version.h"
 #include "capture/ScreenCapture.h"
 
@@ -26,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent)
     QAction *regAct = tb->addAction(QStringLiteral("Chụp vùng"));
     regAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+A")));
     connect(regAct, &QAction::triggered, this, &MainWindow::captureRegion);
+
+    QAction *winAct = tb->addAction(QStringLiteral("Chụp cửa sổ"));
+    winAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+W")));
+    connect(winAct, &QAction::triggered, this, &MainWindow::captureWindow);
 
     QAction *capAct = tb->addAction(QStringLiteral("Chụp toàn màn hình"));
     capAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+F")));
@@ -88,6 +93,43 @@ void MainWindow::captureRegion()
         connect(ov, &RegionOverlay::cancelled, this, [this] {
             show(); raise(); activateWindow();
             statusBar()->showMessage(QStringLiteral("Đã hủy chụp vùng"), 2000);
+        });
+        ov->show();
+        ov->raise();
+        ov->activateWindow();
+        ov->setFocus();
+    });
+}
+
+void MainWindow::captureWindow()
+{
+    hide();
+    QTimer::singleShot(200, this, [this] {
+        const QImage full = capture::captureVirtualDesktop();
+        if (full.isNull()) {
+            show();
+            statusBar()->showMessage(QStringLiteral("Chụp thất bại (nền tảng chưa hỗ trợ?)"), 4000);
+            return;
+        }
+        // Rect cửa sổ ở toạ độ virtual desktop -> dời về toạ độ ẢNH (gốc ảnh = góc virtual desktop).
+        const QPoint origin = capture::virtualDesktopRect().topLeft();
+        QVector<QRect> winsImg;
+        for (const QRect &r : capture::enumerateWindowRects())
+            winsImg.append(r.translated(-origin));
+
+        QRect vg;
+        for (const QScreen *s : QGuiApplication::screens())
+            vg = vg.united(s->geometry());
+
+        auto *ov = new WindowPickerOverlay(full, winsImg, vg);
+        ov->setAttribute(Qt::WA_DeleteOnClose);
+        connect(ov, &WindowPickerOverlay::windowSelected, this, [this](const QImage &img) {
+            show(); raise(); activateWindow();
+            showCaptured(img);
+        });
+        connect(ov, &WindowPickerOverlay::cancelled, this, [this] {
+            show(); raise(); activateWindow();
+            statusBar()->showMessage(QStringLiteral("Đã hủy chụp cửa sổ"), 2000);
         });
         ov->show();
         ov->raise();

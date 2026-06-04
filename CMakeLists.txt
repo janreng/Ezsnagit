@@ -28,7 +28,7 @@ add_library(ezsnag_capture STATIC
 target_include_directories(ezsnag_capture PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_capture PUBLIC Qt6::Core Qt6::Gui)
 if(WIN32)
-    target_link_libraries(ezsnag_capture PUBLIC gdi32 user32)
+    target_link_libraries(ezsnag_capture PUBLIC gdi32 user32 dwmapi)
 endif()
 
 # --- App GUI (shell P0; các module capture/canvas/... thêm dần theo roadmap) ---
@@ -36,6 +36,7 @@ qt_add_executable(Ezsnagit WIN32
     src/main.cpp
     src/ui/MainWindow.cpp src/ui/MainWindow.h
     src/ui/RegionOverlay.cpp src/ui/RegionOverlay.h
+    src/ui/WindowPickerOverlay.cpp src/ui/WindowPickerOverlay.h
     resources.qrc
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)

@@ -3,6 +3,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <dwmapi.h>
+#include <QString>
 
 namespace capture {
 
@@ -68,6 +70,56 @@ QImage captureRegion(const QRect &regionPx) {
     return clamped.isEmpty() ? QImage() : grab(clamped);
 }
 
+// Rect "thật" của cửa sổ: ưu tiên DWM extended frame bounds (sát viền, bỏ shadow);
+// fallback GetWindowRect. Trả pixel vật lý.
+static QRect windowFrameRect(HWND hwnd) {
+    RECT r;
+    if (SUCCEEDED(DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, &r, sizeof(r)))
+        && r.right > r.left && r.bottom > r.top)
+        return QRect(QPoint(r.left, r.top), QPoint(r.right - 1, r.bottom - 1));
+    if (GetWindowRect(hwnd, &r) && r.right > r.left && r.bottom > r.top)   // fallback
+        return QRect(QPoint(r.left, r.top), QPoint(r.right - 1, r.bottom - 1));
+    return QRect();
+}
+
+// Cửa sổ shell (desktop/taskbar) — không cho chọn để chụp.
+static bool isShellWindow(HWND hwnd) {
+    if (hwnd == GetShellWindow()) return true;
+    wchar_t cls[64] = {0};
+    GetClassNameW(hwnd, cls, 64);
+    const QString cn = QString::fromWCharArray(cls);
+    return cn == QLatin1String("Progman") || cn == QLatin1String("WorkerW")
+        || cn == QLatin1String("Shell_TrayWnd") || cn == QLatin1String("Shell_SecondaryTrayWnd")
+        || cn == QLatin1String("NotifyIconOverflowWindow");
+}
+
+static BOOL CALLBACK enumProc(HWND hwnd, LPARAM lparam) {
+    auto *out = reinterpret_cast<QVector<QRect> *>(lparam);
+    if (!IsWindowVisible(hwnd) || IsIconic(hwnd)) return TRUE;        // ẩn/minimize
+    const LONG_PTR ex = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+    if (ex & WS_EX_TOOLWINDOW) return TRUE;                           // palette nổi
+    if (isShellWindow(hwnd)) return TRUE;                             // desktop/taskbar
+    // Bỏ layered window trong suốt hoàn toàn (helper vô hình alpha=0).
+    if (ex & WS_EX_LAYERED) {
+        BYTE alpha = 255; DWORD flags = 0; COLORREF key = 0;
+        if (GetLayeredWindowAttributes(hwnd, &key, &alpha, &flags) && (flags & LWA_ALPHA) && alpha == 0)
+            return TRUE;
+    }
+    // Bỏ cửa sổ bị DWM cloak (vd app UWP ở desktop ảo khác).
+    BOOL cloaked = FALSE;
+    if (SUCCEEDED(DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, &cloaked, sizeof(cloaked))) && cloaked)
+        return TRUE;
+    const QRect fr = windowFrameRect(hwnd);
+    if (fr.width() > 1 && fr.height() > 1) out->append(fr);
+    return TRUE;
+}
+
+QVector<QRect> enumerateWindowRects() {
+    QVector<QRect> rects;                 // EnumWindows trả theo Z-order trước→sau
+    EnumWindows(enumProc, reinterpret_cast<LPARAM>(&rects));
+    return rects;
+}
+
 } // namespace capture
 
 #else  // ----- nền tảng khác: stub (bổ sung sau) -----
@@ -76,6 +128,7 @@ namespace capture {
 QRect  virtualDesktopRect()                       { return QRect(); }
 QImage captureVirtualDesktop()                     { return QImage(); }
 QImage captureRegion(const QRect &)                { return QImage(); }
+QVector<QRect> enumerateWindowRects()              { return {}; }
 }
 
 #endif

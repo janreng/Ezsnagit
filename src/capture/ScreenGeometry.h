@@ -19,4 +19,11 @@ QRect clampToBounds(const QRect &r, const QRect &bounds);
 // Kết quả được kẹp vào trong ảnh. Trả QRect rỗng nếu kích thước không hợp lệ.
 QRect mapWidgetRectToImage(const QRect &sel, const QSize &widgetSize, const QSize &imageSize);
 
+// Như trên nhưng cho một điểm (toạ độ con trỏ widget -> pixel ảnh). Không kẹp biên.
+QPoint mapWidgetPointToImage(const QPoint &p, const QSize &widgetSize, const QSize &imageSize);
+
+// Tìm cửa sổ TRÊN CÙNG chứa điểm p, trong danh sách rects xếp theo Z-order TRƯỚC→SAU
+// (front-to-back). Trả chỉ số cửa sổ đầu tiên chứa p, hoặc -1 nếu không cửa sổ nào.
+int topWindowAt(const QVector<QRect> &rectsFrontToBack, const QPoint &p);
+
 } // namespace capture

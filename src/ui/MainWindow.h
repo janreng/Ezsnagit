@@ -15,6 +15,7 @@ public:
 private slots:
     void captureFullScreen();
     void captureRegion();
+    void captureWindow();
 
 private:
     void showCaptured(const QImage &img);

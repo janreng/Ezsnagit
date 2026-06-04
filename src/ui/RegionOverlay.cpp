@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QCloseEvent>
 #include <QGuiApplication>
 
 RegionOverlay::RegionOverlay(const QImage &frozen, const QRect &overlayGeometry, QWidget *parent)
@@ -48,7 +49,7 @@ void RegionOverlay::paintEvent(QPaintEvent *)
 
 void RegionOverlay::mousePressEvent(QMouseEvent *e)
 {
-    if (e->button() == Qt::RightButton) { emit cancelled(); close(); return; }
+    if (e->button() == Qt::RightButton) { close(); return; }   // hủy (closeEvent)
     if (e->button() == Qt::LeftButton) {
         m_selecting = true;
         m_start = m_cur = e->pos();
@@ -66,15 +67,21 @@ void RegionOverlay::mouseReleaseEvent(QMouseEvent *e)
     if (e->button() != Qt::LeftButton || !m_selecting) return;
     m_selecting = false;
     const QRect sel = selectionWidgetRect();
-    if (sel.width() < 3 || sel.height() < 3) { emit cancelled(); close(); return; }
+    if (sel.width() < 3 || sel.height() < 3) { close(); return; }   // quá nhỏ -> hủy
 
     const QRect inImg = capture::mapWidgetRectToImage(sel, size(), m_frozen.size());
-    if (inImg.isEmpty()) { emit cancelled(); close(); return; }
+    if (inImg.isEmpty()) { close(); return; }
+    m_done = true;
     emit regionSelected(m_frozen.copy(inImg));
     close();
 }
 
 void RegionOverlay::keyPressEvent(QKeyEvent *e)
 {
-    if (e->key() == Qt::Key_Escape) { emit cancelled(); close(); }
+    if (e->key() == Qt::Key_Escape) close();
+}
+
+void RegionOverlay::closeEvent(QCloseEvent *)
+{
+    if (!m_done) { m_done = true; emit cancelled(); }   // mọi đường đóng -> luôn có 1 tín hiệu
 }

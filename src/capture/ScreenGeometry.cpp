@@ -25,4 +25,17 @@ QRect mapWidgetRectToImage(const QRect &sel, const QSize &widgetSize, const QSiz
     return mapped.intersected(QRect(QPoint(0, 0), imageSize));
 }
 
+QPoint mapWidgetPointToImage(const QPoint &p, const QSize &widgetSize, const QSize &imageSize) {
+    if (widgetSize.isEmpty() || imageSize.isEmpty()) return QPoint();
+    const double sx = double(imageSize.width())  / widgetSize.width();
+    const double sy = double(imageSize.height()) / widgetSize.height();
+    return QPoint(qRound(p.x() * sx), qRound(p.y() * sy));
+}
+
+int topWindowAt(const QVector<QRect> &rectsFrontToBack, const QPoint &p) {
+    for (int i = 0; i < rectsFrontToBack.size(); ++i)
+        if (rectsFrontToBack.at(i).contains(p)) return i;
+    return -1;
+}
+
 } // namespace capture

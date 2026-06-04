@@ -34,6 +34,9 @@ QString typeToStr(ObjType t) {
     case ObjType::Box: return "box";
     case ObjType::Highlight: return "highlight";
     case ObjType::Text: return "text";
+    case ObjType::Line: return "line";
+    case ObjType::Step: return "step";
+    case ObjType::Blur: return "blur";
     }
     return "box";
 }
@@ -42,6 +45,9 @@ ObjType typeFromStr(const QString &s) {
     if (s == "arrow") return ObjType::Arrow;
     if (s == "highlight") return ObjType::Highlight;
     if (s == "text") return ObjType::Text;
+    if (s == "line") return ObjType::Line;
+    if (s == "step") return ObjType::Step;
+    if (s == "blur") return ObjType::Blur;
     return ObjType::Box;
 }
 

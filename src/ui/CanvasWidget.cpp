@@ -1,4 +1,5 @@
 #include "CanvasWidget.h"
+#include "effects/Blur.h"
 
 #include <QPainter>
 #include <QMouseEvent>
@@ -17,6 +18,7 @@ void CanvasWidget::setImage(const QImage &img)
 {
     m_doc.setBackground(img);
     m_doc.clear();   // ảnh nền mới -> xoá annotation cũ (tránh vẽ đè / nhân đôi sau xoay/lật)
+    m_nextStep = 1;  // đánh số Step lại từ đầu cho ảnh mới
     // Widget khớp 1:1 với pixel ảnh -> toạ độ chuột chính là toạ độ ảnh.
     setFixedSize(img.size());
     resize(img.size());
@@ -50,9 +52,9 @@ bool CanvasWidget::redo()
 
 QRect CanvasWidget::currentRect() const
 {
-    // Mũi tên cần GIỮ hướng (start->cur) nên không normalize: topLeft=start, bottomRight=cur.
+    // Mũi tên & đường thẳng cần GIỮ hướng (start->cur) nên không normalize.
     // Các hình khác (Box/Highlight/Text) cần rect chuẩn hoá để vẽ đúng.
-    if (m_tool == canvas::ObjType::Arrow)
+    if (m_tool == canvas::ObjType::Arrow || m_tool == canvas::ObjType::Line)
         return QRect(m_start, m_cur);
     return QRect(m_start, m_cur).normalized();
 }
@@ -118,17 +120,38 @@ void CanvasWidget::mouseReleaseEvent(QMouseEvent *e)
     const QRect rect = currentRect();
     repaint(); // xoá preview NGAY (đồng bộ, trước khi dialog modal có thể mở)
 
+    using canvas::ObjType;
+
+    // Step: đặt badge số thứ tự tại điểm click (không cần kéo).
+    if (m_tool == ObjType::Step) {
+        const int sz = 30;
+        const QRect badge(m_start.x() - sz / 2, m_start.y() - sz / 2, sz, sz);
+        canvas::AnnotationObject obj{ ObjType::Step, badge, m_color, m_penWidth,
+                                      QString::number(m_nextStep++) };
+        m_doc.addObject(obj);
+        update();
+        emit documentChanged();
+        return;
+    }
+
     // Quá nhỏ -> coi như click nhầm, bỏ qua.
     const int dx = qAbs(m_cur.x() - m_start.x());
     const int dy = qAbs(m_cur.y() - m_start.y());
-    if (m_tool == canvas::ObjType::Arrow) {
-        if (dx < 3 && dy < 3) return;            // mũi tên: cho phép ngang/dọc, chỉ chặn click
+    if (m_tool == ObjType::Arrow || m_tool == ObjType::Line) {
+        if (dx < 3 && dy < 3) return;            // đường: cho phép ngang/dọc, chỉ chặn click
     } else {
         if (dx < 3 || dy < 3) return;            // hình khối: cần đủ cả rộng lẫn cao
     }
 
+    // Blur: nung trực tiếp vào nền (redaction — không lưu thành object đảo ngược được).
+    if (m_tool == ObjType::Blur) {
+        m_doc.setBackground(effects::blurRegion(m_doc.background(), rect.normalized()));
+        update();
+        return;
+    }
+
     QString text;
-    if (m_tool == canvas::ObjType::Text) {
+    if (m_tool == ObjType::Text) {
         // Hỏi chuỗi cần chèn; rỗng/huỷ -> không thêm object.
         bool ok = false;
         text = QInputDialog::getText(this, tr("Chèn chữ"), tr("Nội dung:"),

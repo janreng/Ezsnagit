@@ -54,4 +54,6 @@ private:
     bool m_dragging = false;
     QPoint m_start;
     QPoint m_cur;
+
+    int m_nextStep = 1;   // số thứ tự kế tiếp cho công cụ Step
 };

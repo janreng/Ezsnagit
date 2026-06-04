@@ -2,6 +2,8 @@
 #include "ui/RegionOverlay.h"
 #include "ui/WindowPickerOverlay.h"
 #include "ui/CanvasWidget.h"
+#include "ui/StyleBar.h"
+#include "canvas/QuickStyle.h"
 #include "core/Version.h"
 #include "capture/ScreenCapture.h"
 #include "hotkey/GlobalHotkey.h"
@@ -69,9 +71,12 @@ MainWindow::MainWindow(QWidget *parent)
         connect(a, &QAction::triggered, this, [this, t] { m_canvas->setTool(t); });
     };
     addTool(QStringLiteral("Mũi tên"), ObjType::Arrow, true);
+    addTool(QStringLiteral("Đường"), ObjType::Line, false);
     addTool(QStringLiteral("Khung"), ObjType::Box, false);
     addTool(QStringLiteral("Tô sáng"), ObjType::Highlight, false);
     addTool(QStringLiteral("Chữ"), ObjType::Text, false);
+    addTool(QStringLiteral("Số bước"), ObjType::Step, false);
+    addTool(QStringLiteral("Làm mờ"), ObjType::Blur, false);
     m_canvas->setTool(ObjType::Arrow);
 
     atb->addAction(QStringLiteral("Màu…"), this, [this] {
@@ -85,6 +90,19 @@ MainWindow::MainWindow(QWidget *parent)
     atb->addAction(QStringLiteral("Xoay phải"), this, &MainWindow::rotateRight);
     atb->addAction(QStringLiteral("Lật ngang"), this, &MainWindow::flipHorizontal);
     atb->addAction(QStringLiteral("Sao chép"), QKeySequence::Copy, this, &MainWindow::copyToClipboard);
+
+    // --- Thanh Quick Styles (preset nhanh: 1 click đổi tool+màu+nét) ---
+    addToolBarBreak();
+    auto *stb = addToolBar(QStringLiteral("Style nhanh"));
+    stb->setMovable(false);
+    auto *styleBar = new StyleBar(stb);
+    connect(styleBar, &StyleBar::styleChosen, this, [this](const canvas::QuickStyle &s) {
+        m_canvas->setTool(s.type);
+        m_canvas->setColor(s.color);
+        m_canvas->setPenWidth(s.penWidth);
+        statusBar()->showMessage(QStringLiteral("Style: %1").arg(s.name), 1500);
+    });
+    stb->addWidget(styleBar);
 
     // Phím tắt TOÀN CỤC: Print Screen -> chụp vùng (kể cả khi app ở nền).
     m_hotkey = new hotkey::GlobalHotkey(this);

@@ -1,5 +1,6 @@
 #pragma once
 #include <QColor>
+#include <QFont>
 #include <QPainter>
 #include <QPolygon>
 #include <QRect>
@@ -10,14 +11,17 @@
 // + hàm vẽ. Toạ độ tính theo pixel ẢNH (cùng hệ với background của CanvasDocument).
 namespace canvas {
 
-enum class ObjType { Arrow, Box, Highlight, Text };
+// Box/Highlight/Text dùng rect chuẩn hoá. Arrow/Line dùng rect KHÔNG chuẩn hoá
+// (topLeft=điểm đầu, bottomRight=điểm cuối) để giữ hướng. Step = badge số thứ tự
+// (số lưu trong text). Blur KHÔNG phải object lưu trữ (được "nung" thẳng vào nền).
+enum class ObjType { Arrow, Box, Highlight, Text, Line, Step, Blur };
 
 struct AnnotationObject {
     ObjType type = ObjType::Box;
     QRect rect;                       // hình học (toạ độ ảnh)
     QColor color = QColor(220, 30, 30);
     int penWidth = 3;
-    QString text;                     // cho ObjType::Text
+    QString text;                     // cho ObjType::Text; với Step = số thứ tự
 };
 
 // Vẽ 1 object lên painter đã mở sẵn (đã set sang hệ toạ độ ảnh).
@@ -74,6 +78,31 @@ inline void paintObject(QPainter &p, const AnnotationObject &o) {
         p.drawText(o.rect, Qt::AlignLeft | Qt::AlignTop | Qt::TextWordWrap, o.text);
         break;
     }
+    case ObjType::Line: {
+        // Đường thẳng từ topLeft -> bottomRight (không đầu mũi tên).
+        QPen pen(o.color);
+        pen.setWidth(o.penWidth);
+        pen.setCapStyle(Qt::RoundCap);
+        p.setPen(pen);
+        p.drawLine(o.rect.topLeft(), o.rect.bottomRight());
+        break;
+    }
+    case ObjType::Step: {
+        // Badge tròn có số thứ tự (số nằm trong o.text). Vẽ tròn màu + số trắng.
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.setPen(Qt::NoPen);
+        p.setBrush(o.color);
+        p.drawEllipse(o.rect);
+        p.setPen(Qt::white);
+        QFont f = p.font();
+        f.setBold(true);
+        f.setPixelSize(qMax(8, int(o.rect.height() * 0.55)));
+        p.setFont(f);
+        p.drawText(o.rect, Qt::AlignCenter, o.text);
+        break;
+    }
+    case ObjType::Blur:
+        break; // Blur được nung vào nền, không vẽ như object.
     }
     p.restore();
 }

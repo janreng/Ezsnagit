@@ -54,7 +54,9 @@ target_include_directories(ezsnag_canvas PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_canvas PUBLIC Qt6::Core Qt6::Gui)
 
 # --- Effects: biến đổi ảnh (crop/rotate/flip/resize/trim) thuần -> static lib.
-add_library(ezsnag_effects STATIC src/effects/Transforms.cpp src/effects/Transforms.h)
+add_library(ezsnag_effects STATIC
+    src/effects/Transforms.cpp src/effects/Transforms.h
+    src/effects/Blur.cpp src/effects/Blur.h)
 target_include_directories(ezsnag_effects PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_effects PUBLIC Qt6::Core Qt6::Gui)
 
@@ -66,6 +68,7 @@ qt_add_executable(Ezsnagit WIN32
     src/ui/WindowPickerOverlay.cpp src/ui/WindowPickerOverlay.h
     src/ui/Magnifier.cpp src/ui/Magnifier.h
     src/ui/CanvasWidget.cpp src/ui/CanvasWidget.h
+    src/ui/StyleBar.cpp src/ui/StyleBar.h
     resources.qrc
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -97,6 +100,10 @@ add_test(NAME canvas COMMAND test_canvas)
 add_executable(test_effects tests/test_effects.cpp)
 target_link_libraries(test_effects PRIVATE ezsnag_effects Qt6::Core Qt6::Gui)
 add_test(NAME effects COMMAND test_effects)
+
+add_executable(test_blur tests/test_blur.cpp)
+target_link_libraries(test_blur PRIVATE ezsnag_effects Qt6::Core Qt6::Gui)
+add_test(NAME blur COMMAND test_blur)
 
 add_executable(test_ezsnagx tests/test_ezsnagx.cpp)
 target_link_libraries(test_ezsnagx PRIVATE ezsnag_canvas Qt6::Core Qt6::Gui)

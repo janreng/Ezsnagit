@@ -1,5 +1,9 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.6.0
+- Chọn **độ dày nét** cho chú thích (1–12 px).
+- Hiệu ứng ảnh mới: **Thêm viền**, **Đổ bóng**, **Cắt viền thừa** (tự bỏ khoảng trắng quanh ảnh).
+
 ## v0.5.0
 - **Kính lúp** khi chọn vùng chụp — phóng to từng pixel để chọn cực chính xác.
 - Công cụ **Cắt ảnh** (Crop): kéo chọn vùng cần giữ.

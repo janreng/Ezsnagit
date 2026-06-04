@@ -19,6 +19,8 @@ private slots:
     void captureRegion();
     void captureWindow();
     void copyToClipboard();
+    void rotateRight();
+    void flipHorizontal();
 
 private:
     void showCaptured(const QImage &img);

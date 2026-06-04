@@ -5,6 +5,7 @@
 #include "capture/ScreenCapture.h"
 #include "hotkey/GlobalHotkey.h"
 #include "share/ImageClipboard.h"
+#include "effects/Transforms.h"
 
 #include <QLabel>
 #include <QScrollArea>
@@ -37,6 +38,12 @@ MainWindow::MainWindow(QWidget *parent)
     QAction *capAct = tb->addAction(QStringLiteral("Chụp toàn màn hình"));
     capAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+F")));
     connect(capAct, &QAction::triggered, this, &MainWindow::captureFullScreen);
+
+    tb->addSeparator();
+    QAction *rotAct = tb->addAction(QStringLiteral("Xoay phải"));
+    connect(rotAct, &QAction::triggered, this, &MainWindow::rotateRight);
+    QAction *flipAct = tb->addAction(QStringLiteral("Lật ngang"));
+    connect(flipAct, &QAction::triggered, this, &MainWindow::flipHorizontal);
 
     tb->addSeparator();
     QAction *copyAct = tb->addAction(QStringLiteral("Sao chép"));
@@ -171,4 +178,16 @@ void MainWindow::copyToClipboard()
     }
     if (share::copyImageToClipboard(m_lastImage))
         statusBar()->showMessage(QStringLiteral("Đã sao chép ảnh vào clipboard"), 2000);
+}
+
+void MainWindow::rotateRight()
+{
+    if (m_lastImage.isNull()) return;
+    showCaptured(effects::rotate90(m_lastImage, true));
+}
+
+void MainWindow::flipHorizontal()
+{
+    if (m_lastImage.isNull()) return;
+    showCaptured(effects::flipHorizontal(m_lastImage));
 }

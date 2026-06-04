@@ -24,7 +24,9 @@ target_link_libraries(ezsnag_core PUBLIC Qt6::Core)
 # --- App GUI (shell P0; các module capture/canvas/... thêm dần theo roadmap) ---
 qt_add_executable(Ezsnagit WIN32
     src/main.cpp
-    src/ui/MainWindow.cpp src/ui/MainWindow.h)
+    src/ui/MainWindow.cpp src/ui/MainWindow.h
+    resources.qrc
+    app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(Ezsnagit PRIVATE EZSNAGIT_VERSION="${PROJECT_VERSION}")
 target_link_libraries(Ezsnagit PRIVATE ezsnag_core Qt6::Core Qt6::Gui Qt6::Widgets)

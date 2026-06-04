@@ -8,3 +8,5 @@ _deps/
 *.exe
 *.o
 *.obj
+installer/*.exe
+dist/

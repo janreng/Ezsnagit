@@ -1,5 +1,6 @@
 #include "ui/MainWindow.h"
 #include <QApplication>
+#include <QIcon>
 
 // Điểm vào Ezsnagit. NFR (SPEC 12 §12.2): per-monitor DPI awareness ngay từ đầu để
 // capture/overlay đúng hình học trên đa màn hình khác scale.
@@ -14,6 +15,7 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("Ezsnagit"));
     app.setOrganizationName(QStringLiteral("Ez"));
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/icon.png"))); // icon app (tạm mượn từ Ezcel, nhúng qua .qrc)
 
     MainWindow w;
     w.show();

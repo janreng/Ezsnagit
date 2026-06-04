@@ -1,0 +1,2 @@
+// Icon cho file .exe trên Windows (taskbar/Explorer). Icon cửa sổ runtime set qua .qrc.
+IDI_ICON1 ICON "assets/icon.ico"

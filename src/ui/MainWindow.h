@@ -18,6 +18,7 @@ private slots:
     void captureFullScreen();
     void captureRegion();
     void captureWindow();
+    void captureScrolling();   // chụp ghép dọc (panoramic thủ công)
     void copyToClipboard();
     void rotateRight();
     void flipHorizontal();

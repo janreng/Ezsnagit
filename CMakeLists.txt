@@ -26,7 +26,8 @@ add_library(ezsnag_capture STATIC
     src/capture/ScreenGeometry.cpp src/capture/ScreenGeometry.h
     src/capture/ScreenCapture.cpp src/capture/ScreenCapture.h
     src/capture/MonitorMap.cpp src/capture/MonitorMap.h
-    src/capture/Stitch.cpp src/capture/Stitch.h)
+    src/capture/Stitch.cpp src/capture/Stitch.h
+    src/capture/StitchMany.cpp src/capture/StitchMany.h)
 target_include_directories(ezsnag_capture PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_capture PUBLIC Qt6::Core Qt6::Gui)
 if(WIN32)
@@ -73,6 +74,7 @@ qt_add_executable(Ezsnagit WIN32
     src/ui/CanvasWidget.cpp src/ui/CanvasWidget.h
     src/ui/StyleBar.cpp src/ui/StyleBar.h
     src/ui/PenWidthPicker.cpp src/ui/PenWidthPicker.h
+    src/ui/PanoramicDialog.cpp src/ui/PanoramicDialog.h
     resources.qrc
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -120,6 +122,10 @@ add_test(NAME frame COMMAND test_frame)
 add_executable(test_stitch tests/test_stitch.cpp)
 target_link_libraries(test_stitch PRIVATE ezsnag_capture Qt6::Core Qt6::Gui)
 add_test(NAME stitch COMMAND test_stitch)
+
+add_executable(test_stitchmany tests/test_stitchmany.cpp)
+target_link_libraries(test_stitchmany PRIVATE ezsnag_capture Qt6::Core Qt6::Gui)
+add_test(NAME stitchmany COMMAND test_stitchmany)
 
 add_executable(test_ezsnagx tests/test_ezsnagx.cpp)
 target_link_libraries(test_ezsnagx PRIVATE ezsnag_canvas Qt6::Core Qt6::Gui)

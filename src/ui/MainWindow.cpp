@@ -3,6 +3,8 @@
 #include "ui/WindowPickerOverlay.h"
 #include "ui/CanvasWidget.h"
 #include "ui/StyleBar.h"
+#include "ui/PanoramicDialog.h"
+#include "capture/StitchMany.h"
 #include "canvas/QuickStyle.h"
 #include "core/Version.h"
 #include "capture/ScreenCapture.h"
@@ -80,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
                   this, &MainWindow::captureWindow);
     tb->addAction(QStringLiteral("Chụp toàn màn hình"), QKeySequence(QStringLiteral("Ctrl+Shift+F")),
                   this, &MainWindow::captureFullScreen);
+    tb->addAction(QStringLiteral("Chụp ghép dọc"), this, &MainWindow::captureScrolling);
 
     // --- Toolbar annotation ---
     auto *atb = addToolBar(QStringLiteral("Chú thích"));
@@ -214,6 +217,43 @@ void MainWindow::captureWindow()
         });
         ov->show(); ov->raise(); ov->activateWindow(); ov->setFocus();
     });
+}
+
+void MainWindow::captureScrolling()
+{
+    auto *dlg = new PanoramicDialog(this);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+
+    // Mỗi lần bấm "Chụp thêm khung": ẩn dialog + app, chọn vùng, nạp khung vào dialog.
+    connect(dlg, &PanoramicDialog::captureRequested, this, [this, dlg] {
+        dlg->hide();
+        hide();
+        QTimer::singleShot(200, this, [this, dlg] {
+            const QImage full = capture::captureVirtualDesktop();
+            auto reshow = [this, dlg] { show(); dlg->show(); dlg->raise(); dlg->activateWindow(); };
+            if (full.isNull()) { reshow(); return; }
+            auto *ov = new RegionOverlay(full, allScreensGeometry());
+            ov->setAttribute(Qt::WA_DeleteOnClose);
+            connect(ov, &RegionOverlay::regionSelected, this, [this, dlg, reshow](const QImage &img) {
+                show(); dlg->addFrame(img); Q_UNUSED(reshow); dlg->show(); dlg->raise(); dlg->activateWindow();
+            });
+            connect(ov, &RegionOverlay::cancelled, this, [reshow] { reshow(); });
+            ov->show(); ov->raise(); ov->activateWindow(); ov->setFocus();
+        });
+    });
+
+    // "Ghép xong": nối các khung thành ảnh dài rồi mở trong editor.
+    connect(dlg, &QDialog::accepted, this, [this, dlg] {
+        const QImage pano = capture::stitchMany(dlg->frames());
+        if (!pano.isNull()) {
+            showCaptured(pano);
+            statusBar()->showMessage(
+                QStringLiteral("Đã ghép %1 khung -> %2 × %3 px")
+                    .arg(dlg->frames().size()).arg(pano.width()).arg(pano.height()), 5000);
+        }
+    });
+
+    dlg->show();
 }
 
 void MainWindow::showCaptured(const QImage &img)

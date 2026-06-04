@@ -1,5 +1,10 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.2.0
+- **Chụp cửa sổ**: di chuột tới cửa sổ nào thì cửa sổ đó sáng lên, bấm một cái là chụp đúng cửa sổ đó.
+- **Phím tắt toàn cục Print Screen**: bấm Print Screen ở bất cứ đâu để gọi chụp vùng ngay, không cần mở app trước.
+- **Tự động sao chép ảnh vào clipboard** sau khi chụp — chụp xong dán thẳng vào chat/tài liệu được luôn (hoặc Ctrl+C để chép lại).
+
 ## v0.1.0
 Bản phát hành đầu tiên — chụp màn hình:
 

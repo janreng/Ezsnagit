@@ -45,8 +45,8 @@ chuyển sang subscription + thu hồi license. Đây là **lý do tồn tại**
 ## 12.5 Hoạt động offline & bản quyền (định vị sản phẩm)
 
 - **Khởi động + chụp KHÔNG cần mạng.** Không ép đăng nhập online, không phone-home (06 §2.6, 08 §7).
-- **Bản quyền trung thực:** sở hữu vĩnh viễn, **không subscription, không thu hồi license**. Đây là lời chê to nhất của Snagit ở mọi nơi (08 §4) → là khẩu hiệu định vị.
-- Kích hoạt (nếu có) phải **offline-first**.
+- **Bản quyền: MIỄN PHÍ** (chốt với sếp 2026-06-04) — không subscription, không thu hồi license, không kích hoạt. Đây là khẩu hiệu định vị, đối lập trực tiếp lời chê to nhất của Snagit (08 §4).
+- Không phone-home, không bắt đăng nhập.
 
 ## 12.6 UX & khám phá tính năng
 
@@ -69,5 +69,5 @@ Lấy từ research 09 §6 — MVP phải đạt:
 | Khẩu hiệu bản quyền | xuyên suốt (README/marketing) |
 
 ## Điểm chưa chắc
-- Mô hình kích hoạt/bản quyền cụ thể do sếp quyết (free/trả phí một lần?).
+- ~~Mô hình bản quyền~~ — **ĐÃ CHỐT: miễn phí** (2026-06-04).
 - Target con số (1s, 60MB) là mục tiêu đề xuất — chỉnh theo thực tế build.

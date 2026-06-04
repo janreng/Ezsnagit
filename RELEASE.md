@@ -1,7 +1,7 @@
 # Phát hành Ezsnagit (quy trình release lên GitHub)
 
 Theo đúng quy trình của Ezcel. Auto-update (làm ở phase sau) sẽ đọc **GitHub Releases** của repo
-`<OWNER>/Ezsnagit` — ⚠️ **chờ sếp tạo repo + xác nhận owner** (dự kiến `janreng/Ezsnagit`), rồi cập nhật vào updater.
+**`janreng/Ezsnagit`** (https://github.com/janreng/Ezsnagit). PAT dùng chung với Ezcel, lưu ở `.env` (gitignored).
 
 ## 1. Tăng số phiên bản
 Sửa cùng một số ở 2 nơi:
@@ -31,5 +31,5 @@ Yêu cầu:
 - Commit/tag thì ASCII.
 
 ## Trạng thái hiện tại
-- ⏳ Chưa có git remote — chờ sếp tạo repo GitHub rồi `git remote add origin ...` + `git push -u origin master`.
+- ✅ Remote: `origin` = https://github.com/janreng/Ezsnagit.git
 - ⏳ Updater (đọc Releases) làm ở phase sau; hiện đã có sẵn `ezsnag_core` so sánh semver.

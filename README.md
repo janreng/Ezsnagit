@@ -12,7 +12,7 @@ Research cộng đồng/đối thủ chỉ ra: điểm yếu lớn nhất của 
 **mô hình bản quyền + footprint** (chuyển sang subscription + thu hồi license, nặng ~420MB, khởi động chậm,
 DPI/đa màn hình sai, ép đăng nhập online, mất Library sau update). Ezsnagit nhắm đúng khe hở đó:
 
-> **Sở hữu vĩnh viễn · không subscription · chạy offline · nhẹ & nhanh.**
+> **Miễn phí · không subscription · chạy offline · nhẹ & nhanh.**
 
 Đây là kim chỉ nam, không chỉ là khẩu hiệu — xem các target đo được ở `docs/specs/12-non-functional-requirements.md`
 (cold start < 1s, base install < 60MB, DPI/đa màn hình đúng ngày-một, Library backup an toàn). Ngoài ra nhắm tới

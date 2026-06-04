@@ -10,3 +10,5 @@ _deps/
 *.obj
 installer/*.exe
 dist/
+.env
+*.env

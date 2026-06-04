@@ -2,8 +2,8 @@
 #include <QMainWindow>
 #include <QImage>
 
-class QLabel;
 class QScrollArea;
+class CanvasWidget;
 namespace hotkey { class GlobalHotkey; }
 
 // App shell — P1 slice 1: nút "Chụp toàn màn hình" -> hiện ảnh chụp trong app.
@@ -21,12 +21,14 @@ private slots:
     void copyToClipboard();
     void rotateRight();
     void flipHorizontal();
+    void openFile();
+    void saveFile();
+    void exportPng();
 
 private:
     void showCaptured(const QImage &img);
 
     QScrollArea *m_scroll = nullptr;
-    QLabel *m_canvas = nullptr;   // hiển thị ảnh chụp (placeholder editor canvas)
+    CanvasWidget *m_canvas = nullptr;   // editor canvas (ảnh nền + annotation vector)
     hotkey::GlobalHotkey *m_hotkey = nullptr;
-    QImage m_lastImage;           // ảnh chụp gần nhất (để copy clipboard)
 };

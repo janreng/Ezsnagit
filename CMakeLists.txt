@@ -47,7 +47,9 @@ target_link_libraries(ezsnag_share PUBLIC Qt6::Core Qt6::Gui)
 
 # --- Canvas: document model editor (object graph vector + undo/redo + .ezsnagx) -> static lib.
 add_library(ezsnag_canvas STATIC
-    src/canvas/CanvasDocument.cpp src/canvas/CanvasDocument.h src/canvas/AnnotationObject.h)
+    src/canvas/CanvasDocument.cpp src/canvas/CanvasDocument.h src/canvas/AnnotationObject.h
+    src/canvas/EzsnagxFile.cpp src/canvas/EzsnagxFile.h
+    src/canvas/QuickStyle.cpp src/canvas/QuickStyle.h)
 target_include_directories(ezsnag_canvas PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_canvas PUBLIC Qt6::Core Qt6::Gui)
 
@@ -63,6 +65,7 @@ qt_add_executable(Ezsnagit WIN32
     src/ui/RegionOverlay.cpp src/ui/RegionOverlay.h
     src/ui/WindowPickerOverlay.cpp src/ui/WindowPickerOverlay.h
     src/ui/Magnifier.cpp src/ui/Magnifier.h
+    src/ui/CanvasWidget.cpp src/ui/CanvasWidget.h
     resources.qrc
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -94,3 +97,11 @@ add_test(NAME canvas COMMAND test_canvas)
 add_executable(test_effects tests/test_effects.cpp)
 target_link_libraries(test_effects PRIVATE ezsnag_effects Qt6::Core Qt6::Gui)
 add_test(NAME effects COMMAND test_effects)
+
+add_executable(test_ezsnagx tests/test_ezsnagx.cpp)
+target_link_libraries(test_ezsnagx PRIVATE ezsnag_canvas Qt6::Core Qt6::Gui)
+add_test(NAME ezsnagx COMMAND test_ezsnagx)
+
+add_executable(test_quickstyle tests/test_quickstyle.cpp)
+target_link_libraries(test_quickstyle PRIVATE ezsnag_canvas Qt6::Core Qt6::Gui)
+add_test(NAME quickstyle COMMAND test_quickstyle)

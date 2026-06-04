@@ -1,22 +1,29 @@
 #include "ui/MainWindow.h"
 #include "ui/RegionOverlay.h"
 #include "ui/WindowPickerOverlay.h"
+#include "ui/CanvasWidget.h"
 #include "core/Version.h"
 #include "capture/ScreenCapture.h"
 #include "hotkey/GlobalHotkey.h"
 #include "share/ImageClipboard.h"
 #include "effects/Transforms.h"
+#include "canvas/EzsnagxFile.h"
 
-#include <QLabel>
 #include <QScrollArea>
 #include <QStatusBar>
 #include <QToolBar>
+#include <QMenuBar>
+#include <QMenu>
 #include <QAction>
-#include <QPixmap>
+#include <QActionGroup>
 #include <QImage>
 #include <QTimer>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QFileDialog>
+#include <QColorDialog>
+
+using canvas::ObjType;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -24,31 +31,60 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle(QStringLiteral("Ezsnagit"));
     resize(1000, 680);
 
-    // Thanh công cụ tối giản (P1): chụp toàn màn hình.
-    auto *tb = addToolBar(QStringLiteral("Capture"));
+    // Canvas editor trong scroll area (1:1 pixel ảnh).
+    m_canvas = new CanvasWidget(this);
+    m_scroll = new QScrollArea(this);
+    m_scroll->setWidget(m_canvas);
+    m_scroll->setWidgetResizable(false);
+    m_scroll->setAlignment(Qt::AlignCenter);
+    setCentralWidget(m_scroll);
+
+    // --- Menu Tệp ---
+    QMenu *fileMenu = menuBar()->addMenu(QStringLiteral("&Tệp"));
+    QAction *openAct = fileMenu->addAction(QStringLiteral("Mở…"), QKeySequence::Open, this, &MainWindow::openFile);
+    QAction *saveAct = fileMenu->addAction(QStringLiteral("Lưu…"), QKeySequence::Save, this, &MainWindow::saveFile);
+    QAction *expAct  = fileMenu->addAction(QStringLiteral("Xuất PNG…"), this, &MainWindow::exportPng);
+    Q_UNUSED(openAct); Q_UNUSED(saveAct); Q_UNUSED(expAct);
+
+    // --- Toolbar chụp ---
+    auto *tb = addToolBar(QStringLiteral("Chụp"));
     tb->setMovable(false);
-    QAction *regAct = tb->addAction(QStringLiteral("Chụp vùng"));
-    regAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+A")));
-    connect(regAct, &QAction::triggered, this, &MainWindow::captureRegion);
+    tb->addAction(QStringLiteral("Chụp vùng"), QKeySequence(QStringLiteral("Ctrl+Shift+A")),
+                  this, &MainWindow::captureRegion);
+    tb->addAction(QStringLiteral("Chụp cửa sổ"), QKeySequence(QStringLiteral("Ctrl+Shift+W")),
+                  this, &MainWindow::captureWindow);
+    tb->addAction(QStringLiteral("Chụp toàn màn hình"), QKeySequence(QStringLiteral("Ctrl+Shift+F")),
+                  this, &MainWindow::captureFullScreen);
 
-    QAction *winAct = tb->addAction(QStringLiteral("Chụp cửa sổ"));
-    winAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+W")));
-    connect(winAct, &QAction::triggered, this, &MainWindow::captureWindow);
+    // --- Toolbar annotation ---
+    auto *atb = addToolBar(QStringLiteral("Chú thích"));
+    atb->setMovable(false);
+    auto *grp = new QActionGroup(this);
+    grp->setExclusive(true);
+    auto addTool = [&](const QString &name, ObjType t, bool checked) {
+        QAction *a = atb->addAction(name);
+        a->setCheckable(true);
+        a->setChecked(checked);
+        grp->addAction(a);
+        connect(a, &QAction::triggered, this, [this, t] { m_canvas->setTool(t); });
+    };
+    addTool(QStringLiteral("Mũi tên"), ObjType::Arrow, true);
+    addTool(QStringLiteral("Khung"), ObjType::Box, false);
+    addTool(QStringLiteral("Tô sáng"), ObjType::Highlight, false);
+    addTool(QStringLiteral("Chữ"), ObjType::Text, false);
+    m_canvas->setTool(ObjType::Arrow);
 
-    QAction *capAct = tb->addAction(QStringLiteral("Chụp toàn màn hình"));
-    capAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+F")));
-    connect(capAct, &QAction::triggered, this, &MainWindow::captureFullScreen);
-
-    tb->addSeparator();
-    QAction *rotAct = tb->addAction(QStringLiteral("Xoay phải"));
-    connect(rotAct, &QAction::triggered, this, &MainWindow::rotateRight);
-    QAction *flipAct = tb->addAction(QStringLiteral("Lật ngang"));
-    connect(flipAct, &QAction::triggered, this, &MainWindow::flipHorizontal);
-
-    tb->addSeparator();
-    QAction *copyAct = tb->addAction(QStringLiteral("Sao chép"));
-    copyAct->setShortcut(QKeySequence::Copy);   // Ctrl+C
-    connect(copyAct, &QAction::triggered, this, &MainWindow::copyToClipboard);
+    atb->addAction(QStringLiteral("Màu…"), this, [this] {
+        const QColor c = QColorDialog::getColor(QColor(220, 30, 30), this, QStringLiteral("Chọn màu"));
+        if (c.isValid()) m_canvas->setColor(c);
+    });
+    atb->addSeparator();
+    atb->addAction(QStringLiteral("Hoàn tác"), QKeySequence::Undo, this, [this] { m_canvas->undo(); });
+    atb->addAction(QStringLiteral("Làm lại"), QKeySequence::Redo, this, [this] { m_canvas->redo(); });
+    atb->addSeparator();
+    atb->addAction(QStringLiteral("Xoay phải"), this, &MainWindow::rotateRight);
+    atb->addAction(QStringLiteral("Lật ngang"), this, &MainWindow::flipHorizontal);
+    atb->addAction(QStringLiteral("Sao chép"), QKeySequence::Copy, this, &MainWindow::copyToClipboard);
 
     // Phím tắt TOÀN CỤC: Print Screen -> chụp vùng (kể cả khi app ở nền).
     m_hotkey = new hotkey::GlobalHotkey(this);
@@ -57,31 +93,23 @@ MainWindow::MainWindow(QWidget *parent)
             if (id == 1) captureRegion();
         });
 
-    // Canvas = QLabel trong QScrollArea (placeholder cho editor canvas sau này).
-    m_canvas = new QLabel(this);
-    m_canvas->setAlignment(Qt::AlignCenter);
-    m_canvas->setText(QStringLiteral("Ezsnagit %1\nBấm \"Chụp toàn màn hình\" (Ctrl+Shift+F)")
-                          .arg(core::appVersion()));
-    m_scroll = new QScrollArea(this);
-    m_scroll->setWidget(m_canvas);
-    // resizable=false: canvas giữ kích thước thật của ảnh chụp -> có scrollbar khi ảnh lớn
-    // hơn viewport (xem ảnh full-size). Nội dung nhỏ (text placeholder) được căn giữa.
-    m_scroll->setWidgetResizable(false);
-    m_scroll->setAlignment(Qt::AlignCenter);
-    setCentralWidget(m_scroll);
+    statusBar()->showMessage(QStringLiteral("Ezsnagit %1 — sẵn sàng").arg(core::appVersion()));
+}
 
-    statusBar()->showMessage(QStringLiteral("Sẵn sàng"));
+// Vùng logical phủ hết các màn hình (để overlay che toàn bộ).
+static QRect allScreensGeometry() {
+    QRect vg;
+    for (const QScreen *s : QGuiApplication::screens())
+        vg = vg.united(s->geometry());
+    return vg;
 }
 
 void MainWindow::captureFullScreen()
 {
-    // Ẩn cửa sổ app để không tự chụp chính nó, đợi một nhịp cho redraw rồi chụp.
     hide();
     QTimer::singleShot(200, this, [this] {
         const QImage img = capture::captureVirtualDesktop();
-        show();
-        raise();
-        activateWindow();
+        show(); raise(); activateWindow();
         if (img.isNull()) {
             statusBar()->showMessage(QStringLiteral("Chụp thất bại (nền tảng chưa hỗ trợ?)"), 4000);
             return;
@@ -100,12 +128,7 @@ void MainWindow::captureRegion()
             statusBar()->showMessage(QStringLiteral("Chụp thất bại (nền tảng chưa hỗ trợ?)"), 4000);
             return;
         }
-        // Vùng logical phủ hết các màn hình (để overlay che toàn bộ).
-        QRect vg;
-        for (const QScreen *s : QGuiApplication::screens())
-            vg = vg.united(s->geometry());
-
-        auto *ov = new RegionOverlay(full, vg);
+        auto *ov = new RegionOverlay(full, allScreensGeometry());
         ov->setAttribute(Qt::WA_DeleteOnClose);
         connect(ov, &RegionOverlay::regionSelected, this, [this](const QImage &img) {
             show(); raise(); activateWindow();
@@ -115,10 +138,7 @@ void MainWindow::captureRegion()
             show(); raise(); activateWindow();
             statusBar()->showMessage(QStringLiteral("Đã hủy chụp vùng"), 2000);
         });
-        ov->show();
-        ov->raise();
-        ov->activateWindow();
-        ov->setFocus();
+        ov->show(); ov->raise(); ov->activateWindow(); ov->setFocus();
     });
 }
 
@@ -132,17 +152,12 @@ void MainWindow::captureWindow()
             statusBar()->showMessage(QStringLiteral("Chụp thất bại (nền tảng chưa hỗ trợ?)"), 4000);
             return;
         }
-        // Rect cửa sổ ở toạ độ virtual desktop -> dời về toạ độ ẢNH (gốc ảnh = góc virtual desktop).
         const QPoint origin = capture::virtualDesktopRect().topLeft();
         QVector<QRect> winsImg;
         for (const QRect &r : capture::enumerateWindowRects())
             winsImg.append(r.translated(-origin));
 
-        QRect vg;
-        for (const QScreen *s : QGuiApplication::screens())
-            vg = vg.united(s->geometry());
-
-        auto *ov = new WindowPickerOverlay(full, winsImg, vg);
+        auto *ov = new WindowPickerOverlay(full, winsImg, allScreensGeometry());
         ov->setAttribute(Qt::WA_DeleteOnClose);
         connect(ov, &WindowPickerOverlay::windowSelected, this, [this](const QImage &img) {
             show(); raise(); activateWindow();
@@ -152,18 +167,13 @@ void MainWindow::captureWindow()
             show(); raise(); activateWindow();
             statusBar()->showMessage(QStringLiteral("Đã hủy chụp cửa sổ"), 2000);
         });
-        ov->show();
-        ov->raise();
-        ov->activateWindow();
-        ov->setFocus();
+        ov->show(); ov->raise(); ov->activateWindow(); ov->setFocus();
     });
 }
 
 void MainWindow::showCaptured(const QImage &img)
 {
-    m_lastImage = img;
-    m_canvas->setPixmap(QPixmap::fromImage(img));
-    m_canvas->resize(img.size());
+    m_canvas->setImage(img);
     // Tự copy vào clipboard ngay (enabler bug-report loop: chụp -> dán).
     share::copyImageToClipboard(img);
     statusBar()->showMessage(
@@ -172,22 +182,80 @@ void MainWindow::showCaptured(const QImage &img)
 
 void MainWindow::copyToClipboard()
 {
-    if (m_lastImage.isNull()) {
+    if (!m_canvas->hasImage()) {
         statusBar()->showMessage(QStringLiteral("Chưa có ảnh để sao chép"), 2000);
         return;
     }
-    if (share::copyImageToClipboard(m_lastImage))
-        statusBar()->showMessage(QStringLiteral("Đã sao chép ảnh vào clipboard"), 2000);
+    if (share::copyImageToClipboard(m_canvas->document().renderFlattened()))
+        statusBar()->showMessage(QStringLiteral("Đã sao chép ảnh (kèm chú thích) vào clipboard"), 2000);
 }
 
 void MainWindow::rotateRight()
 {
-    if (m_lastImage.isNull()) return;
-    showCaptured(effects::rotate90(m_lastImage, true));
+    if (!m_canvas->hasImage()) return;
+    m_canvas->setImage(effects::rotate90(m_canvas->document().renderFlattened(), true));
 }
 
 void MainWindow::flipHorizontal()
 {
-    if (m_lastImage.isNull()) return;
-    showCaptured(effects::flipHorizontal(m_lastImage));
+    if (!m_canvas->hasImage()) return;
+    m_canvas->setImage(effects::flipHorizontal(m_canvas->document().renderFlattened()));
+}
+
+void MainWindow::openFile()
+{
+    const QString path = QFileDialog::getOpenFileName(
+        this, QStringLiteral("Mở tài liệu"), QString(),
+        QStringLiteral("Ezsnagit (*.ezsnagx);;Ảnh (*.png *.jpg *.bmp)"));
+    if (path.isEmpty()) return;
+
+    if (path.endsWith(QStringLiteral(".ezsnagx"), Qt::CaseInsensitive)) {
+        canvas::CanvasDocument doc;
+        if (canvas::loadEzsnagx(doc, path)) {
+            m_canvas->loadDocument(doc);
+            statusBar()->showMessage(QStringLiteral("Đã mở %1").arg(path), 4000);
+        } else {
+            statusBar()->showMessage(QStringLiteral("Mở thất bại"), 4000);
+        }
+    } else {
+        QImage img(path);
+        if (!img.isNull()) showCaptured(img);
+        else statusBar()->showMessage(QStringLiteral("Không đọc được ảnh"), 4000);
+    }
+}
+
+void MainWindow::saveFile()
+{
+    if (!m_canvas->hasImage()) {
+        statusBar()->showMessage(QStringLiteral("Chưa có gì để lưu"), 2000);
+        return;
+    }
+    QString path = QFileDialog::getSaveFileName(
+        this, QStringLiteral("Lưu tài liệu"), QStringLiteral("anh.ezsnagx"),
+        QStringLiteral("Ezsnagit (*.ezsnagx)"));
+    if (path.isEmpty()) return;
+    if (!path.endsWith(QStringLiteral(".ezsnagx"), Qt::CaseInsensitive))
+        path += QStringLiteral(".ezsnagx");
+    if (canvas::saveEzsnagx(m_canvas->document(), path))
+        statusBar()->showMessage(QStringLiteral("Đã lưu %1").arg(path), 4000);
+    else
+        statusBar()->showMessage(QStringLiteral("Lưu thất bại"), 4000);
+}
+
+void MainWindow::exportPng()
+{
+    if (!m_canvas->hasImage()) {
+        statusBar()->showMessage(QStringLiteral("Chưa có ảnh để xuất"), 2000);
+        return;
+    }
+    QString path = QFileDialog::getSaveFileName(
+        this, QStringLiteral("Xuất PNG"), QStringLiteral("anh.png"),
+        QStringLiteral("PNG (*.png)"));
+    if (path.isEmpty()) return;
+    if (!path.endsWith(QStringLiteral(".png"), Qt::CaseInsensitive))
+        path += QStringLiteral(".png");
+    if (canvas::exportPng(m_canvas->document(), path))
+        statusBar()->showMessage(QStringLiteral("Đã xuất %1").arg(path), 4000);
+    else
+        statusBar()->showMessage(QStringLiteral("Xuất thất bại"), 4000);
 }

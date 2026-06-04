@@ -25,7 +25,7 @@ Chốt **nền tảng mục tiêu** và **ranh giới clone** để khỏi sa l�
 
 ## 11.3 Phạm vi clone (in-scope vs gác lại)
 
-**Làm (theo roadmap P0–P12):**
+**Làm (theo roadmap P0–P13):**
 - Capture ảnh (region/window/fullscreen/scrolling), editor annotation đầy đủ, effects + transforms, library + auto-save, share file/clipboard/email, Grab Text OCR, video trim/cut + GIF, templates cơ bản.
 
 **Gác lại / ngoài phạm vi:**

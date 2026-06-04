@@ -43,7 +43,7 @@ Phần video chỉ chạm ở mức điểm vào (Video tab, nút Video Capture 
   3. **Presets** — cấu hình chụp đã lưu, mỗi preset có hotkey riêng (xem 01.15).
   4. **OneClick (Capture Widget)** — tab/toolbar nổi ở mép màn hình, expand khi hover để chụp nhanh theo preset (xem 01.16).
 - **Tùy chọn/Settings:** Preference "Capture interface" chọn Capture Window vs Capture Widget làm bề mặt chính.
-- **Ưu tiên:** MVP (P1) — Capture Window + Hotkeys. Presets P2. OneClick P2.
+- **Ưu tiên:** ⭐MVP (P1) — Capture Window + Hotkeys (MVP-A). Presets P2. OneClick P2.
 - **Ghi chú clone C++/Qt:** `ui/HotkeyManager` đăng ký global hotkey qua `RegisterHotKey` (Win32) cho mọi nền (Qt không có global hotkey native). App chạy nền = `QSystemTrayIcon` + không gọi `quit` khi đóng window.
 
 ### 01.3 All-in-One Capture (crosshairs / magnifier / dimensions)
@@ -56,29 +56,30 @@ Phần video chỉ chạm ở mức điểm vào (Video tab, nút Video Capture 
   - **Magnifier** — loupe zoom cạnh cursor cho chọn cạnh chính xác pixel; bật/tắt qua preference **Show magnifier**.
   - **Simplified crosshairs** — preference làm gọn cursor cho hiệu năng.
   - **Dimension readout** — live W×H khi kéo; có thể nhập số chính xác qua **Selection properties** (kích thước cố định + tọa độ vị trí).
-- **Ưu tiên:** MVP (P1).
+  - **Magnifier + crosshair + dimension readout polish** — combo loupe zoom + crosshair khóa cursor + readout W×H live là **chuẩn chất lượng cảm nhận** (CleanShot-grade), không chỉ tiện ích phụ. Nâng thành ⭐MVP: phải mượt, đọc pixel chính xác, hiện/ẩn theo preference nhưng mặc định bật.
+- **Ưu tiên:** ⭐MVP (P1) — MVP-A.
 - **Ghi chú clone C++/Qt:** Lớp overlay chụp = `QWidget` fullscreen, frameless, `Qt::WindowStaysOnTopHint`, vẽ dim + crosshairs + magnifier bằng `QPainter`. Magnifier đọc pixel từ screen grab (DXGI/`Windows.Graphics.Capture` hoặc fallback GDI `BitBlt`). Region detection: trên Windows enum window/control qua UIAutomation hoặc `WindowFromPoint` + `GetWindowRect`/`DwmGetWindowAttribute` (loại bỏ shadow). Data model `Selection { QRect rect; enum DetectKind }`.
 
 ### 01.4 Region / Selection capture
 
 - **Mô tả:** Chụp một vùng chữ nhật người dùng tự vẽ.
 - **Tùy chọn/Settings:** Selection = **Region**; hỗ trợ nhập kích thước chính xác qua Selection properties.
-- **Ưu tiên:** MVP (P1).
+- **Ưu tiên:** ⭐MVP (P1) — MVP-A.
 - **Ghi chú clone C++/Qt:** crop từ screen grab theo `QRect` đã chọn. Phím tắt liên quan: **Shift+Enter** = Start Region Selection, **Enter** = finalize, **Esc** = cancel (Windows).
 
 ### 01.5 Window capture
 
 - **Mô tả:** Chụp một window mở (auto-detect).
 - **Tùy chọn/Settings:** Selection = **Window**; hover window tới khi viền orange dashed hiện → click.
-- **Ưu tiên:** MVP (P1).
+- **Ưu tiên:** ⭐MVP (P1) — MVP-A.
 - **Ghi chú clone C++/Qt:** dùng region detection của 01.3; crop theo bounding rect của window. Cân nhắc DWM-aware bounds để loại viền/đổ bóng.
 
 ### 01.6 Fullscreen capture
 
 - **Mô tả:** Chụp toàn màn hình.
-- **Tùy chọn/Settings:** Selection = **Fullscreen**; chụp bằng nút hoặc hotkey. **Multi-monitor:** chỉ chụp **một monitor** tại một thời điểm (monitor dưới cursor / active).
-- **Ưu tiên:** MVP (P1).
-- **Ghi chú clone C++/Qt:** `QScreen` của monitor active; grab toàn screen. Mac fullscreen hotkey = **F**.
+- **Tùy chọn/Settings:** Selection = **Fullscreen**; chụp bằng nút hoặc hotkey. **Multi-monitor:** chụp được monitor dưới cursor / active, hoặc toàn bộ virtual desktop. Hình học capture phải **đúng trên đa màn hình khác scale (mixed-DPI)** — đây là **nền tảng P1**, không phải "verify sau" (xem SPEC 12 §12.2).
+- **Ưu tiên:** ⭐MVP (P1) — MVP-A.
+- **Ghi chú clone C++/Qt:** `QScreen` của monitor active; grab toàn screen. Per-monitor DPI awareness (PER_MONITOR_V2) để toạ độ đúng khi scale khác nhau. Mac fullscreen hotkey = **F**.
 
 ### 01.7 Grab Text capture (OCR)
 
@@ -185,7 +186,7 @@ Phần video chỉ chạm ở mức điểm vào (Video tab, nút Video Capture 
 - **Tùy chọn/Settings:**
   - **Windows (Preferences):** Run Ezsnagit when Windows starts · Capture interface (Window vs Widget) · **Show magnifier** · **Simplified crosshairs** · **Require Start button for scrolling capture** · Support HDR color settings · **Hotkeys tab** (đổi hotkey + **Allow override other hotkey assignments**) · **Capture cursor** (gồm/loại con trỏ).
   - **Mac (Settings):** **Hide Ezsnagit and controls when capturing** · **Hide desktop icons during video capture** · **Require Start button for scrolling capture** · **Keyboard tab** (hotkey tùy biến) · Webcam device selection; video frame rate/encoding (video-side).
-  - **Multiple monitors:** Fullscreen = single monitor (active/cursor); Region/Window/Scrolling chạy trên monitor dưới cursor; span nhiều monitor cho 1 region chưa phải headline feature — **(verify)**.
+  - **Multiple monitors:** Fullscreen chụp monitor active/cursor hoặc toàn virtual desktop; Region/Window/Scrolling chạy đúng trên mọi monitor. **Region được phép span nhiều monitor có scale khác nhau** — hình học mixed-DPI đúng là **nền tảng P1** (xem SPEC 12 §12.2), không phải "verify sau".
   - **Delays:** Time Delay (giây), Schedule (ngày/giờ), Interval/time-lapse (Windows). Countdown ở bottom-right.
 - **Ưu tiên:** P1 (Show magnifier, Simplified crosshairs, Capture cursor, Run at startup, Capture interface); HDR + Require Start P3.
 - **Ghi chú clone C++/Qt:** chi tiết Preferences UI ở SPEC 10; spec này chỉ liệt kê item liên quan chụp. Lưu qua `QSettings`.
@@ -194,12 +195,61 @@ Phần video chỉ chạm ở mức điểm vào (Video tab, nút Video Capture 
 
 - **Mô tả:** Hotkey toàn cục + per-preset; tích hợp Print Screen trên Windows.
 - **Tùy chọn/Settings:**
-  - **Default Windows capture shortcuts:** Global Capture = **Print Screen** · Start Region Selection = **Shift+Enter** · Take Capture (finalize) = **Enter** · Cancel = **Esc** · Start/Pause/Resume Recording = **Shift+F9** · Stop Recording = **Shift+F10** · Scrolling H/V/Both = **H/V/B** (during capture, on hover) · Repeat Last Capture = (có tài liệu, **uncertain** key chính xác Windows).
+  - **Default Windows capture shortcuts:** Global Capture = **Print Screen** · Start Region Selection = **Shift+Enter** · Take Capture (finalize) = **Enter** · Cancel = **Esc** · Start/Pause/Resume Recording = **Shift+F9** · Stop Recording = **Shift+F10** · Scrolling H/V/Both = **H/V/B** (during capture, on hover) · Repeat Last Capture = **Ctrl+Shift+R** (chốt default, khớp Snagit Mac).
   - **Default Mac capture shortcuts:** Global Capture = **Control+Shift+C** · All-in-One = **Control+Shift+O** · Image = **Control+Shift+S** · Video = **Control+Shift+V** · Take Capture = **Command+Return** · Cancel = **Esc** · Fullscreen = **F** · Grab Text = **Shift+Command+O** · Repeat Last Capture = **Control+Shift+R** · Scrolling H/V/Diagonal = **R/D/X** · Start/Pause Recording = **Control+Shift+Spacebar**.
   - Global hotkey **editable**: mở Capture Window → click **Shortcut** field → bấm tổ hợp. Preset hotkey đặt per-preset.
   - **PrintScreen integration (Windows):** bind Print Screen làm trigger chụp toàn cục. **Conflict Windows 11:** Print Screen có thể mở Snipping Tool native; để nhường key cho Ezsnagit → tắt Windows **Settings → Accessibility → Keyboard → "Use the Print screen key to open screen capture"**, restart. Có option **"Capture Directly to Image Using Print Screen"** (Print Screen ra ảnh trực tiếp).
-- **Ưu tiên:** P1 (Global Capture, Region, finalize, Cancel, Print Screen bind); Repeat Last Capture P2; recording hotkeys theo SPEC 05.
+- **Ưu tiên:** ⭐MVP P1 (Global Capture rebindable, Region, finalize, Cancel, Print Screen bind, **Repeat Last Capture** = Ctrl+Shift+R — rẻ mà cực được yêu thích, ship ngay MVP-A); recording hotkeys theo SPEC 05.
 - **Ghi chú clone C++/Qt:** `ui/HotkeyManager` qua Win32 `RegisterHotKey`. Print Screen có thể bị OS chặn → cần fallback/hướng dẫn user tắt Snipping Tool. "Allow override other hotkey assignments" = cố `RegisterHotKey` ưu tiên, báo conflict nếu fail.
+
+### 01.20 Screen-freeze before selection
+
+- **Mô tả:** Đóng băng màn hình ngay lúc kích hoạt chụp — chụp 1 frame tĩnh và để người dùng chọn vùng **trên ảnh đứng yên** thay vì trên nội dung động (video đang chạy, animation, tooltip biến mất). Một usability win lớn (research 07 §3/§10 Tier-1 #4).
+- **Tùy chọn/Settings:** mặc định bật; preference tắt nếu muốn chọn trên màn hình live. Magnifier/crosshair đọc pixel từ chính frame đã đóng băng nên ổn định.
+- **Ưu tiên:** ⭐MVP (P1) — MVP-A.
+- **Ghi chú clone C++/Qt:** rẻ trong Qt — grab 1 screenshot toàn virtual desktop lúc kích hoạt, hiển thị làm **fullscreen overlay tĩnh** (`QWidget` frameless, `Qt::WindowStaysOnTopHint`), vẽ dim + crosshairs lên trên. Region detection (01.3) vẫn chạy trên geometry thật (window rects), chỉ phần hiển thị là frame đóng băng.
+
+### 01.21 Self-timer / delay capture
+
+- **Mô tả:** Hẹn giờ chụp sau N giây để dàn dựng màn hình (mở menu, hover state, sắp cửa sổ). Trùng cơ chế **Time Delay** ở 01.9 nhưng đề cao như một quick-action MVP.
+- **Tùy chọn/Settings:** chọn số giây; **countdown** hiện góc dưới-phải trước khi chụp (như 01.9).
+- **Ưu tiên:** ⭐MVP (P1) — MVP-A (đã có Time Delay ở 01.9; đánh dấu phần delay cơ bản là MVP).
+- **Ghi chú clone C++/Qt:** `QTimer` đếm ngược + widget countdown overlay nhỏ ở bottom-right (chung hạ tầng với 01.9).
+
+### 01.22 Repeat Last Capture
+
+- **Mô tả:** Lặp lại đúng capture trước (cùng selection type + vùng + settings) bằng **1 phím** — daily-driver được yêu thích, rẻ để build (research 09 §3/§6).
+- **Tùy chọn/Settings:** default key **Ctrl+Shift+R** (đổi được qua Hotkeys; xem 01.19). Lặp lại lần chụp gần nhất không cần qua Capture Window.
+- **Ưu tiên:** ⭐MVP (P1) — MVP-A (chốt, bỏ "uncertain").
+- **Ghi chú clone C++/Qt:** lưu `CaptureSettings` + `Selection.rect` của lần chụp cuối; hotkey trigger replay thẳng. Đăng ký qua `HotkeyManager`.
+
+### 01.23 Preset copy-thẳng-clipboard (không mở editor)
+
+- **Mô tả:** Preset chụp → **copy thẳng vào clipboard**, KHÔNG mở Editor nặng. Đây là **enabler của bug-report loop** (luồng tần suất cao nhất: chụp → dán <5 giây, research 09 §6 #1).
+- **Tùy chọn/Settings:** preset với **Preview in Editor: Off** + **Copy to Clipboard: On** + **Share: None**; trigger bằng hotkey riêng của preset (xem 01.15).
+- **Ưu tiên:** ⭐MVP (P1) — MVP-A (kéo từ P2 lên: là fast-path enabler).
+- **Ghi chú clone C++/Qt:** sau finalize, bỏ qua mở `CaptureWindow`/Editor; đẩy `QImage` vào `QClipboard` rồi đóng overlay. Dùng chung pipeline `CaptureSettings { previewInEditor=false; copyToClipboard=true }` (01.17).
+
+### 01.24 Pinned / floating screenshots
+
+- **Mô tả:** Ghim ảnh vừa chụp thành **cửa sổ nổi trên mọi cửa sổ khác** để đối chiếu khi làm việc (CleanShot-grade, research 07 §3/§10 Tier-2 #5). Differentiator UX.
+- **Tùy chọn/Settings:** chỉnh opacity, kéo-thả vị trí, click-through lock (cho click xuyên qua xuống app dưới), đóng nhanh.
+- **Ưu tiên:** P7 (differentiator — xem ROADMAP P7).
+- **Ghi chú clone C++/Qt:** `QWidget` frameless `Qt::WindowStaysOnTopHint` chứa `QLabel`/pixmap; opacity qua `setWindowOpacity`; click-through qua `Qt::WindowTransparentForInput` (toggle). Nhiều pin = nhiều widget độc lập.
+
+### 01.25 Quick Access Overlay
+
+- **Mô tả:** Khay capture-gần-đây **thoáng qua** hiện ngay sau khi chụp, không cần mở Editor — kéo-thả/copy/share nhanh rồi tự ẩn (research 07 §10 Tier-2). Khác với Recent Tray của Editor (vốn cần Editor đang mở).
+- **Tùy chọn/Settings:** thumbnail vài capture gần nhất; hover để hành động (copy / save / share / mở editor); tự ẩn sau thời gian rảnh.
+- **Ưu tiên:** P7 (differentiator — xem ROADMAP P7).
+- **Ghi chú clone C++/Qt:** `QWidget` nổi transient (góc màn hình), danh sách thumbnail từ store capture gần nhất; auto-hide timer. Độc lập với cửa sổ Editor.
+
+### 01.26 After-capture chain
+
+- **Mô tả:** Sau khi chụp, nối chuỗi xử-lý-sau gọn: **effects → save → copy-link** (hoặc editor → OCR → upload) tự động theo cấu hình, kiểu ShareX. Per-preset destination ở đây chỉ là điểm vào; chuỗi đầy đủ + upload layer pluggable thuộc share spec.
+- **Tùy chọn/Settings:** preset chỉ định các bước nối tiếp khi finalize (xem 01.15 cho share-per-preset).
+- **Ưu tiên:** P7 (differentiator) — chi tiết pipeline + destination-picker **trỏ SPEC 07 (Share)**.
+- **Ghi chú clone C++/Qt:** thiết kế **upload/destination layer dạng interface pluggable** ngay từ đầu (xem SPEC 07); module capture chỉ phát sự kiện "capture finalized" + `CaptureSettings.chain`. Tránh hard-code danh sách đích.
 
 ---
 
@@ -209,13 +259,13 @@ Phần video chỉ chạm ở mức điểm vào (Video tab, nút Video Capture 
 |---|---|---|
 | 01.1 | Capture Window — All-in-One + Image tabs | **P1** |
 | 01.1 | Video tab (chức năng quay) | P3 (điểm vào P1) |
-| 01.2 | Entry: Capture Window + Hotkeys | **P1** |
+| 01.2 | Entry: Capture Window + Hotkeys | ⭐**P1** (MVP-A) |
 | 01.2 | Entry: Presets | P2 |
 | 01.2 | Entry: OneClick | P2 |
-| 01.3 | All-in-One: crosshairs / magnifier / dimensions / region detect | **P1** |
-| 01.4 | Region capture | **P1** |
-| 01.5 | Window capture | **P1** |
-| 01.6 | Fullscreen capture | **P1** |
+| 01.3 | All-in-One: crosshairs / magnifier / dimensions / region detect | ⭐**P1** (MVP-A) |
+| 01.4 | Region capture | ⭐**P1** (MVP-A) |
+| 01.5 | Window capture | ⭐**P1** (MVP-A) |
+| 01.6 | Fullscreen capture | ⭐**P1** (MVP-A) |
 | 01.7 | Grab Text capture (luồng) | P2 (OCR engine SPEC 04) |
 | 01.8 | Advanced → Menu | P3 |
 | 01.9 | Time Delay | P2 |
@@ -225,17 +275,23 @@ Phần video chỉ chạm ở mức điểm vào (Video tab, nút Video Capture 
 | 01.12 | Webcam image | P4 |
 | 01.12 | Printer capture (Win) | P5 |
 | 01.12 | Mission Control (Mac) | bỏ qua |
-| 01.13 | On-screen toolbar (Image/Video/Scrolling) | **P1** |
+| 01.13 | On-screen toolbar (Image/Video/Scrolling) | ⭐**P1** (MVP-A) |
 | 01.13 | Toolbar: Grab Text / Effects / Dimensions | P2 |
 | 01.14 | Automatic Scrolling (arrows + stitch) | P3 |
 | 01.14 | Manual / Panoramic Scrolling | P3 |
 | 01.15 | Presets | P2 |
 | 01.16 | OneClick widget | P2 |
-| 01.17 | Per-tab settings (cursor/preview/clipboard) | **P1** |
+| 01.17 | Per-tab settings (cursor/preview/clipboard) | ⭐**P1** (MVP-A) |
 | 01.18 | Capture preferences cơ bản | **P1** |
 | 01.18 | HDR / Require Start button | P3 |
-| 01.19 | Global hotkeys + Print Screen bind | **P1** |
-| 01.19 | Repeat Last Capture | P2 |
+| 01.19 | Global hotkeys + Print Screen bind | ⭐**P1** (MVP-A) |
+| 01.20 | Screen-freeze before selection | ⭐**P1** (MVP-A) |
+| 01.21 | Self-timer / delay capture | ⭐**P1** (MVP-A) |
+| 01.22 | Repeat Last Capture (Ctrl+Shift+R) | ⭐**P1** (MVP-A) |
+| 01.23 | Preset copy-thẳng-clipboard (no editor) | ⭐**P1** (MVP-A) |
+| 01.24 | Pinned / floating screenshots | P7 (differentiator) |
+| 01.25 | Quick Access Overlay | P7 (differentiator) |
+| 01.26 | After-capture chain (trỏ SPEC 07) | P7 (differentiator) |
 
 ---
 
@@ -246,9 +302,9 @@ Phần video chỉ chạm ở mức điểm vào (Video tab, nút Video Capture 
 1. **Inventory + thứ tự nút** trên on-screen (orange) toolbar — vị trí Grab Text / Effects / Dimensions (chỉ trên toolbar, hay chỉ ở Selection dropdown?).
 2. Toggle thứ ba on-screen build hiện tại là **"Panoramic"** hay **"Scrolling"**?
 3. **Mac availability** của Freehand và Menu advanced modes.
-4. Phím **Repeat Last Capture** chính xác trên Windows.
-5. Hành vi **multi-monitor** cho một region span nhiều màn hình.
-6. "All-in-One / Image / Video" xuất hiện như on-screen toggle hay chỉ là tab của Capture Window?
-7. **Mac scrolling arrow hotkeys** R / D / X — xác nhận theo build.
-8. Naming note: "3 Capture modes" vs "Image/Video/Panoramic" trên các trang marketing/legacy.
-9. Chi tiết flow **Printer capture** (Windows) chưa được cover.
+4. "All-in-One / Image / Video" xuất hiện như on-screen toggle hay chỉ là tab của Capture Window?
+5. **Mac scrolling arrow hotkeys** R / D / X — xác nhận theo build.
+6. Naming note: "3 Capture modes" vs "Image/Video/Panoramic" trên các trang marketing/legacy.
+7. Chi tiết flow **Printer capture** (Windows) chưa được cover.
+
+> **Đã giải quyết (không còn "verify"):** phím **Repeat Last Capture** = **Ctrl+Shift+R** (chốt default, 01.19/01.22); hành vi **multi-monitor / region span đa màn hình mixed-DPI** = nền tảng **P1**, đúng hình học theo SPEC 12 §12.2 (không còn là "verify sau").

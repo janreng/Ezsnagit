@@ -30,7 +30,7 @@ Phạm vi & ranh giới quan trọng (bám research):
 ### 03.1 Border
 - **Mô tả:** vẽ viền đặc bao quanh toàn ảnh (hoặc vùng selection trên Windows).
 - **Tùy chọn:** màu (swatch preset / palette / eyedropper / hex/RGB), độ rộng (width slider, px).
-- **Ưu tiên:** MVP P4.
+- **Ưu tiên:** **⭐MVP P4.**
 - **Ghi chú clone:** `QPainter::drawRect` viền theo `QPen(color, width)` quanh biên ảnh; hoặc cấp phát `QImage` lớn hơn `2*width` mỗi chiều rồi fill nền màu border + vẽ ảnh gốc vào giữa (giữ pixel gốc nguyên vẹn). Cách thứ hai chuẩn hơn nếu border nằm ngoài ảnh.
 
 ### 03.2 Edges (edge effects)
@@ -46,7 +46,7 @@ Phạm vi & ranh giới quan trọng (bám research):
 ### 03.3 Shadow
 - **Mô tả:** đổ bóng quanh ảnh ở các cạnh đã chọn hoặc toàn bộ.
 - **Tùy chọn:** (nguồn Windows) grid selector chọn hướng + size; (nguồn Mac) thêm **opacity / offset / blur**. Ezsnagit gộp đủ: hướng, size, opacity, offset, blur.
-- **Ưu tiên:** MVP P4.
+- **Ưu tiên:** **⭐MVP P4.**
 - **Ghi chú clone:** tạo silhouette ảnh (alpha), tô đen theo opacity, dịch theo offset, làm mờ bằng blur (separable Gaussian hoặc `QGraphicsBlurEffect` render xuống `QImage`), composite phía sau ảnh gốc trên canvas mở rộng.
 
 ### 03.4 Perspective
@@ -74,9 +74,10 @@ Phạm vi & ranh giới quan trọng (bám research):
 - **Ghi chú clone:** alpha mask = `QRadialGradient`/`QLinearGradient` áp DestinationIn ở rìa.
 
 ### 03.8 Capture Info
-- **Mô tả:** in metadata chụp lên ảnh: tên app, version, ngày/giờ, OS, + ô text tùy chỉnh.
+- **Mô tả:** in metadata chụp lên ảnh: tên app, version, ngày/giờ, OS, URL, kích thước (dimensions), + ô text tùy chỉnh.
 - **Tùy chọn:** màu nền, thuộc tính font. (Có ở cả Win & Mac.)
-- **Ưu tiên:** P5.
+- **Ưu tiên:** **⭐MVP P4.**
+- **Core của bug-report workflow:** đây là tính năng "ký" lên capture các thông tin timestamp / app / url / dimensions — nằm trên critical path của luồng báo lỗi (workflow #2). Vì vậy kéo lên MVP, không để P5.
 - **Ghi chú clone:** đọc metadata từ capture (`ezsnag_capture` lưu vào canvas metadata), `QPainter::drawText` vào dải nền ở cạnh ảnh. Lưu ý giờ hệ thống chạy PST → khi format timestamp cần đúng định dạng người dùng mong đợi.
 
 ### 03.9 Color Adjustment
@@ -116,11 +117,15 @@ Phạm vi & ranh giới quan trọng (bám research):
 - **Ghi chú Mac workaround (tham chiếu):** Mac không có Watermark riêng — dùng logo kéo vào canvas + hạ opacity, hoặc Stamp. Trong Ezsnagit, Stamp thuộc `ezsnag_annotations`; Watermark vẫn là effect riêng ở đây.
 
 ### 03.13 Spotlight & Magnify (effect) *(nguồn: Windows effect)*
-- **Mô tả:** làm nổi + phóng to một vùng đã chọn trong một thao tác gộp; làm mờ/tối nền xung quanh.
-- **Tùy chọn:** chọn vùng bằng Selection tool trước; thuộc tính: mức magnify, độ tối/mờ nền.
+- **Mô tả:** **baked effect** làm nổi một vùng đã chọn: làm mờ/tối nền xung quanh (dim/blur background) + **tùy chọn** phóng to vùng (magnify region) trong một thao tác gộp.
+- **Đây là canonical home của "Spotlight & Magnify".** Mục này là nơi đặc tả chính thức của effect dim/blur-nền (+ magnify tùy chọn). Phân biệt rõ với object sống ở SPEC 02:
+  - **Magnify (live object)** → SPEC 02 §02.16 — annotation re-edit được, sống trong canvas.
+  - **Spotlight & Magnify (baked effect)** → mục này (SPEC 03 §03.13) — phép raster nung vào ảnh.
+  - **Editor KHÔNG được surface hai control "magnify" gây nhầm lẫn cạnh nhau:** một control là live-object Magnify (SPEC 02), control kia là baked Spotlight&Magnify effect (ở đây). Đặt chúng ở hai chỗ rõ ràng (toolbar annotation vs panel Effects), label khác nhau.
+- **Tùy chọn:** chọn vùng bằng Selection tool trước; thuộc tính: **magnify on/off** + mức magnify, độ tối/mờ nền (dim opacity + blur).
 - **Ưu tiên:** P5.
-- **Ghi chú clone:** baked operation: (1) làm tối/mờ toàn ảnh (overlay đen opacity + blur), (2) vẽ lại vùng selection đã scale-up vào vị trí (clip theo shape). Khác với annotation Magnify (object sống, thuộc `ezsnag_annotations`).
-- **Điểm chưa chắc:** Snagit Mac không có effect này (dùng Spotlight **tool** không phóng to). Ezsnagit gộp cả hai khả năng vào một effect có cờ "magnify on/off".
+- **Ghi chú clone:** baked operation: (1) làm tối/mờ toàn ảnh (overlay đen opacity + blur), (2) nếu magnify on: vẽ lại vùng selection đã scale-up vào vị trí (clip theo shape). Khác với annotation Magnify (object sống, thuộc `ezsnag_annotations`).
+- **Quyết định (đã chốt):** ranh giới tool-vs-effect KHÔNG còn deferred. Spotlight&Magnify là **baked effect** và sống ở mục này; live Magnify object là SPEC 02 §02.16. Hai thứ tồn tại song song có chủ đích (xem SPEC 02 §6.5). Effect có cờ "magnify on/off" để bao cả caso Mac (Spotlight không phóng to).
 
 ---
 
@@ -129,13 +134,13 @@ Phạm vi & ranh giới quan trọng (bám research):
 ### 03.14 Crop
 - **Mô tả:** xén bỏ phần rìa ngoài vùng chọn.
 - **Tùy chọn:** kéo **blue handles** đặt vùng giữ; kéo selection để dời; click **Crop** để xóa ngoài vùng. Circle/round crop qua Selection tool + kéo **yellow diamond** bo góc (avatar tròn).
-- **Ưu tiên:** MVP P4.
+- **Ưu tiên:** **⭐MVP P4.**
 - **Ghi chú clone:** `QImage::copy(QRect)` theo vùng giữ. Round crop: tạo alpha mask `QPainterPath` (rounded rect/ellipse) áp DestinationIn rồi crop bbox. Canvas thu nhỏ về kích thước vùng giữ.
 
 ### 03.15 Trim / Auto-Trim
 - **Mô tả:** tự động bỏ padding/whitespace ở rìa (phát hiện viền đồng màu).
 - **Tùy chọn:** tolerance màu; (tùy chọn) chọn cạnh nào trim.
-- **Ưu tiên:** MVP P4 (đặc trưng hữu ích).
+- **Ưu tiên:** **⭐MVP P4** (đặc trưng hữu ích).
 - **Ghi chú clone (auto-detect viền):** lấy màu góc (corner color) làm tham chiếu; **quét từ mỗi cạnh vào trong**, dừng tại scanline/cột đầu tiên có pixel lệch màu góc vượt tolerance; ghép thành bounding box rồi crop về box đó. Cho phép chọn corner tham chiếu (mặc định top-left) và tolerance.
 - **Điểm chưa chắc:** entry point UI gốc của Snagit không xác nhận được trên tutorial hiện tại (xưa ở `Image > Trim`). Ta tự đặt menu `Image > Trim` + nút Auto-Trim.
 
@@ -152,7 +157,7 @@ Phạm vi & ranh giới quan trọng (bám research):
 ### 03.17 Resize Image
 - **Mô tả:** đổi kích thước pixel thật của ảnh.
 - **Tùy chọn:** **units** ∈ { percent, pixels, inches, centimeters }; **lock aspect ratio**; (Windows) **Resolution (DPI)** + **Resampling** (resample bật có thể giảm chất lượng vĩnh viễn); (Mac) **pixel density** trước khi resize.
-- **Ưu tiên:** MVP P4 (pixels/percent + aspect lock); P5 (inch/cm/DPI/resample).
+- **Ưu tiên:** **⭐MVP P4** (pixels/percent + aspect lock); P5 (inch/cm/DPI/resample).
 - **Ghi chú clone:** `QImage::scaled(w,h, aspectMode, Qt::SmoothTransformation)`. Inch/cm ↔ px qua DPI. DPI lưu vào `QImage::setDotsPerMeterX/Y`. Cảnh báo người dùng khi upscale (resample) làm giảm chất lượng.
 
 ### 03.18 Resize Canvas / Expand Canvas
@@ -165,13 +170,13 @@ Phạm vi & ranh giới quan trọng (bám research):
 ### 03.19 Rotate
 - **Mô tả:** xoay ảnh.
 - **Tùy chọn:** preset **90° CW / 90° CCW / 180°**; **custom angle** (số nguyên độ); (Mac) kéo xoay tương tác qua control circle.
-- **Ưu tiên:** MVP P4 (90/180/custom).
+- **Ưu tiên:** **⭐MVP P4** (90/180/custom).
 - **Ghi chú clone:** 90/180 = hoán vị scanline (không nội suy, không mất chất lượng). Custom angle = `QTransform().rotate(deg)` + `QPainter` smooth; canvas mở rộng để chứa bbox xoay. Kéo xoay tương tác để sau (P5).
 
 ### 03.20 Flip
 - **Mô tả:** lật ảnh.
 - **Tùy chọn:** **Flip Horizontal** (trái↔phải), **Flip Vertical** (trên↔dưới).
-- **Ưu tiên:** MVP P4.
+- **Ưu tiên:** **⭐MVP P4.**
 - **Ghi chú clone:** `QImage::mirrored(horizontal, vertical)`. **Quan trọng:** flip cũng phải **mirror cả annotation/text** trên canvas (chúng bị lật, không chỉ nền) → cần phối hợp `ezsnag_canvas` biến đổi toạ độ object, không chỉ raster nền.
 
 ### 03.21 Canvas Color
@@ -186,24 +191,24 @@ Phạm vi & ranh giới quan trọng (bám research):
 
 | Tính năng | Nhóm | Ưu tiên | Nguồn gốc nền tảng |
 |---|---|---|---|
-| Border | Effect | MVP P4 | Win+Mac |
+| Border | Effect | ⭐MVP P4 | Win+Mac |
+| Shadow | Effect | ⭐MVP P4 | Win+Mac (Mac thêm opacity/offset/blur) |
+| Capture Info | Effect | ⭐MVP P4 | Win+Mac (core bug-report) |
+| Crop (+ round crop) | Transform | ⭐MVP P4 | Win+Mac |
+| Trim / Auto-Trim | Transform | ⭐MVP P4 | (entry uncertain) |
+| Resize Image (px/percent + aspect) | Transform | ⭐MVP P4 | Win+Mac |
+| Rotate (90/180/custom) | Transform | ⭐MVP P4 | Win+Mac |
+| Flip H/V (mirror annotation) | Transform | ⭐MVP P4 | Win+Mac |
 | Edges (drop shadow/torn/faded) | Effect | MVP P4 | Win+Mac |
 | Edges (wave/saw/shark tooth/beveled) | Effect | P5 | Win+Mac |
-| Shadow | Effect | MVP P4 | Win+Mac (Mac thêm opacity/offset/blur) |
 | Color Adjustment (5 slider) | Effect | MVP P4 | Win+Mac |
 | Filters: grayscale/invert/opacity/sharpen/soften | Effect | MVP P4 | Win+Mac |
 | Filters: monochrome/sepia | Effect | P5 | Win mono / Mac sepia |
-| Crop (+ round crop) | Transform | MVP P4 | Win+Mac |
-| Trim / Auto-Trim | Transform | MVP P4 | (entry uncertain) |
 | Cut Out (straight stitch, H/V) | Transform | MVP P4 | Win+Mac |
 | Cut Out (decorative torn + add space) | Transform | P5 | Win+Mac / add-space Mac |
-| Resize Image (px/percent + aspect) | Transform | MVP P4 | Win+Mac |
 | Resize Image (inch/cm/DPI/resample) | Transform | P5 | Win DPI/resample, Mac density |
-| Rotate (90/180/custom) | Transform | MVP P4 | Win+Mac |
-| Flip H/V (mirror annotation) | Transform | MVP P4 | Win+Mac |
 | Canvas Color (incl. transparent) | Transform | MVP P4 | Win+Mac |
 | Perspective | Effect | P5 | Win+Mac |
-| Capture Info | Effect | P5 | Win+Mac |
 | Color Replacement | Effect | P5 | Win-only |
 | Watermark (overlay/underlay) | Effect | P5 | Win-only (Mac workaround) |
 | Spotlight & Magnify (effect) | Effect | P5 | Win effect (Mac dùng tool) |
@@ -217,7 +222,6 @@ Phạm vi & ranh giới quan trọng (bám research):
 - **Filter sub-options** thay đổi theo bản Snagit; danh sách trong 03.10 là đại diện, không bất biến.
 - **Trim entry point** không xác nhận được trên tutorial hiện tại; lịch sử ở `Image > Trim`. Phương án dự phòng documented: Fill tool (thay viền đặc thành trong suốt) + Crop thủ công.
 - **Resize/Expand Canvas UI** gốc thiên kéo cạnh; bản cũ có dialog Canvas Size — cần chốt theo phiên bản đích.
-- **Spotlight & Magnify** chỉ là *effect* trên Windows; Mac chỉ có Spotlight *tool* (không magnify). Ta gộp thành một effect có cờ magnify.
 - **Sepia trên Windows:** không có toggle "Sepia" tên riêng; thường đạt qua monochrome/color adjustment. Ezsnagit cấp sepia rõ ràng cho tiện.
 - **Page Curl / Reflection / Fade** là effect nguồn-gốc một-nền-tảng, ít dùng → P6, có thể bỏ nếu hẹp thời gian.
 - Lưu ý cross-platform của Snagit (`.snagx` không mở trên Windows) không ảnh hưởng Ezsnagit vì ta dùng format riêng `.ezsnagx` một nền tảng.

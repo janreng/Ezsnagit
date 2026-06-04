@@ -98,7 +98,7 @@ CanvasDocument
 - **Serialize `.ezsnagx`:** JSON (object list: type/geometry/style/z) + PNG nền nhúng/đính kèm. Chi tiết format ở SPEC 09.
 
 ### Vector vs raster trong clone
-- **Vector objects** (re-edit): Arrow, Text, Callout, Shape, Line, Highlight, Step, Stamp, Pen (khi Create-as-Vector), Magnify, Blur/Pixelate, Spotlight. → `QGraphicsItem` subclass.
+- **Vector objects** (re-edit): Arrow, Text, Callout, Shape, Line, Highlight, Step, Stamp, Pen (khi Create-as-Vector), Magnify, Blur/Pixelate. → `QGraphicsItem` subclass. *(Spotlight KHÔNG ở đây — là effect baked, xem SPEC 03 §03.13.)*
 - **Raster ops** (sửa thẳng background pixel, có undo nhưng không phải object): Fill (bucket), Eraser, Crop, Cut Out, Selection-paste/delete, Pen (khi raster). → thao tác trên `backgroundRaster` (QImage) qua `QUndoCommand` lưu before/after region.
 
 ---
@@ -112,26 +112,26 @@ CanvasDocument
 ### 02.1 Arrow
 - **Mô tả:** mũi tên chỉ hướng chú ý. Vẽ click-drag **tail → head**; giữ **Shift** ràng buộc H/V/45°.
 - **Properties:** Color (theme/HEX/RGB/eyedropper) · End Style (kiểu đầu mũi) · Line Style (solid/dashed/dotted) · Width (px, slider) · Start/End size (tỉ lệ đầu mũi) · Opacity · Shadow (direction + advanced: color/distance/opacity/blur; angle trên Win) · **Bezier curve** (kéo white handle uốn cong; Win+Mac).
-- **Ưu tiên:** **MVP P3** (tool cốt lõi, không có bezier ở MVP — bezier P3+/sau).
+- **Ưu tiên:** **⭐MVP P3** (tool cốt lõi, không có bezier ở MVP — bezier P3+/sau).
 - **Clone C++/Qt:** `EzsnagArrowItem : QGraphicsItem`. Hình học = 2 điểm (tail/head) + tham số đầu mũi; `paint()` dựng `QPainterPath` thân + polygon đầu mũi. Bezier = thêm control point → `QPainterPath::cubicTo`. Shadow = vẽ path offset/blur (hoặc `QGraphicsDropShadowEffect` cho bản đơn giản).
 
 ### 02.2 Text
 - **Mô tả:** thêm caption/heading/label dạng chữ trực tiếp (**không** có hộp nền). Click-drag tạo text box → gõ. Cần hộp nền/đuôi chỉ → dùng **Callout**.
 - **Properties:** Font · Font size · B/I/U/Strikethrough (tùy nền tảng) · **Fill color** (ruột chữ) + **Outline color** + outline width (0 = không viền) · Alignment (H/V) · Opacity · Shadow · **Padding** (Win) · **Select All Text Objects** (bulk-edit, bản mới).
-- **Ưu tiên:** **MVP P3.**
+- **Ưu tiên:** **⭐MVP P3.**
 - **Clone:** `EzsnagTextItem : QGraphicsTextItem` (hoặc subclass tự quản layout). Editing in-place qua `QTextCursor`/`setTextInteractionFlags`. Outline chữ = vẽ `QPainterPath` từ glyph (`QPainterPath::addText`) rồi stroke; fill + outline 2 lượt. Select-All = lệnh chọn mọi item cùng type trong scene.
 
 ### 02.3 Callout (speech bubbles)
 - **Mô tả:** text box có shape + fill + **đuôi (tail)** chỉ. **Shape Style** dropdown (rounded rect, speech/thought bubble, oval…). Click-drag vẽ → gõ.
 - **Handles:** white = resize; **yellow** = di đầu đuôi; **blue** = thêm đuôi; **green** = rotate; **anchor point** dời thân callout so với đuôi.
 - **Properties:** Fill color (theme/HEX/RGB/eyedropper; Mac thêm gradient) · Outline color · Shadow · **Arrow/Tail style** (line style + end style + size + color) · Text (font, color, size, B/I/U/strike, align H/V, padding + opacity trên Win).
-- **Ưu tiên:** **MVP P3** (gradient fill, multi-tail = sau).
+- **Ưu tiên:** **⭐MVP P3** (gradient fill, multi-tail = sau).
 - **Clone:** `EzsnagCalloutItem : QGraphicsItem` chứa một child `QGraphicsTextItem` cho text. Body = `QPainterPath` theo shape style; tail = path tam giác nối anchor→tip; multi-tail = list tip points. Custom handle items cho yellow/blue/green/anchor.
 
 ### 02.4 Shape
 - **Mô tả:** thêm shape / khung vùng. Click-drag **rectangle**/**ellipse**; chọn **Polygon** trong properties (kéo cạnh đầu, click chốt mỗi góc). Giữ **Shift** = square/circle hoàn hảo.
 - **Properties:** Fill color (kể cả **transparent** → khung rỗng) · Outline color · Line width (px) + Line style · Opacity · Shadow.
-- **Ưu tiên:** **MVP P3.**
+- **Ưu tiên:** **⭐MVP P3.**
 - **Clone:** `EzsnagShapeItem : QGraphicsItem` với enum `{Rect, Ellipse, Polygon}`; `paint()` theo loại. Polygon = `QPolygonF` + chế độ nhập tuần tự (click thêm điểm, double-click kết thúc). Green handle rotate qua `setTransformOriginPoint` + `setRotation`.
 
 ### 02.5 Line
@@ -145,15 +145,21 @@ CanvasDocument
 - **Mô tả:** highlight bán trong suốt phủ vùng, vẫn thấy nội dung dưới (như bút dạ). Click-drag vùng cần highlight.
 - **Properties:** Color · Opacity (semi-transparent) · **Shape** (Mac only: rect, rounded rect, oval, polygon) · **Apply only to text** (Mac only).
 - **Phân biệt:** đây là **Highlighter annotation tool** (tạo object highlight mờ), KHÁC **Spotlight & Magnify effect** (làm tối/nhấn — SPEC 03). Trên Windows nhấn mạnh dạng shape làm qua Selection + effect.
-- **Ưu tiên:** **MVP P3** (chỉ rect; shape khác + apply-only-to-text = sau, tùy nền tảng).
+- **Ưu tiên:** **⭐MVP P3** (chỉ rect; shape khác + apply-only-to-text = sau, tùy nền tảng).
 - **Clone:** `EzsnagHighlightItem : QGraphicsItem`, fill màu với alpha thấp + composition mode `Multiply` (`QPainter::CompositionMode_Multiply`) để giống bút dạ phủ lên text.
 
 ### 02.7 Step (numbered/lettered sequence)
 - **Mô tả:** click thả badge số/chữ **tự tăng** để minh hoạ chuỗi/quy trình. Mỗi click sau tăng tiếp.
 - **Properties:** **Type** (numbers 1,2,3 / letters A,B,C / a,b,c / **Roman**) · Fill color · Text color · **Shape** (circle/square…) · Shadow · Opacity · **Restart Sequence** · **Select All** (bản mới).
 - **Manual:** right-click step → **Edit Value** đổi số/chữ. Move tool reposition → sequence renumber hợp lý.
-- **Ưu tiên:** **MVP P3** (numbers + circle; letters/roman + custom shape sau).
+- **Ưu tiên:** **⭐MVP-B (P3)** (numbers + circle; letters/roman + custom shape sau). Đây là **Step tool thủ công** — phân biệt với **Step-Capture** (auto chụp khi click) ở §02.7b.
 - **Clone:** `EzsnagStepItem : QGraphicsItem` (badge = shape + text giữa). Sequence state quản ở document level (`StepSequence` trong `ezsnag_canvas`): danh sách step theo thứ tự, renumber khi thêm/xóa/Restart. Edit Value override giá trị thủ công.
+
+### 02.7b Step-Capture (auto chụp khi click)
+- **Mô tả:** tính năng documentation chủ lực — **tự chụp một screenshot mỗi lần user click**, đồng thời **dò tên UI element** đang được click và **đánh số tự động** theo thứ tự thao tác. Tạo nhanh tài liệu hướng dẫn từng-bước (step-by-step guide) mà không phải chụp + đánh số thủ công.
+- **Phân biệt:** đây **KHÁC** Step tool thủ công (§02.7). Step tool = thả badge số trên một capture có sẵn; Step-Capture = **engine chụp tự động** theo từng click, sinh ra chuỗi capture đã đánh số.
+- **Ưu tiên:** **P10 (fast-follow)** — không thuộc MVP; OS-integration nặng nên làm sau khi nền capture/editor đã ổn.
+- **Ghi chú clone:** cần **hook chuột toàn cục** (global mouse hook) để bắt mỗi click; trên Windows dùng **UI Automation (UIA)** để lấy **tên control** đang được click; mỗi click → trigger capture + ghi tên element + tăng số đếm.
 
 ### 02.8 Stamp (stickers / graphics)
 - **Mô tả:** thả stamp/sticker đồ hoạ (cursor, emoji, icon, badge…). Chọn **category** dropdown hoặc **search** → click đặt → kéo/handle resize.
@@ -207,7 +213,7 @@ CanvasDocument
 ### 02.15 Crop — RASTER (transform)
 - **Mô tả:** xén mép thừa của ảnh. Kéo **blue handle** định vùng giữ → reposition → click **Crop** áp dụng.
 - **Note:** đổi kích thước canvas/ảnh (destructive với pixel bị xén sau khi áp dụng).
-- **Ưu tiên:** **MVP P3** (thao tác cơ bản, hay dùng ngay sau chụp).
+- **Ưu tiên:** **⭐MVP P3** (thao tác cơ bản, hay dùng ngay sau chụp).
 - **Clone:** overlay crop rect (`QGraphicsView` rubber-band riêng) → áp dụng = `QImage::copy(rect)` + dịch tọa độ mọi object vector về gốc mới + đổi `canvasSize`. Undo lưu ảnh + geometry trước.
 
 ### 02.16 Magnify
@@ -221,17 +227,12 @@ CanvasDocument
 - **Types (properties):** **Blur** (mờ ống kính) · **Pixelate** (ô vuông lớn — tốt cho mặt/ID) · **Solid shape** (phủ đặc hoàn toàn — **khuyến nghị cho redact thật** vì không reverse được).
 - **Intensity** slider · **Shape** dropdown.
 - **Smart Redact:** AI tự phát hiện + che dữ liệu nhạy cảm (email, phone, credit-card…). → thuộc nhóm AI, **tạm gác / SPEC 04**.
-- **Security note:** Blur/Pixelate đơn thuần có thể **đảo ngược một phần** → dùng **solid shape** cho redact nhạy cảm.
-- **Ưu tiên:** **MVP P3** (Blur + Pixelate + Solid; **Smart Redact = sau**).
+- **⚠️ Security / Redaction note (LOUD):** Blur được giữ dạng **object có thể đảo ngược TỚI KHI flatten** (chọn lại đổi/gỡ intensity, hoặc lấy lại pixel gốc từ file `.ezsnagx`). Vì vậy Blur/Pixelate **KHÔNG an toàn** cho dữ liệu nhạy cảm. **Redaction AN TOÀN = Solid shape** (phủ đặc, không reverse được) **hoặc flatten ngay** sau khi che. Đây là **security note cho UI** (cảnh báo user khi redact info nhạy cảm), không chỉ là vấn đề format/serialize.
+- **Ưu tiên:** **⭐MVP P3** (Blur + Pixelate + Solid; **Smart Redact = sau**).
 - **Clone:** `EzsnagObscureItem : QGraphicsItem` với enum `{Blur, Pixelate, Solid}`. Khi paint: lấy region ảnh nền dưới item, áp filter (Gaussian blur / downscale-upscale cho pixelate / fill đặc) theo intensity, vẽ vào bounds. Re-editable (đổi type/intensity) → giữ là object, **flatten khi export**. (Snagit docs xếp gần raster, nhưng object hoá tiện re-edit — xem ghi chú ở mục Mô hình vector.)
 
 ### 02.18 Spotlight
-- **Mô tả:** nhấn mạnh vùng bằng cách **làm tối / blur xung quanh**.
-- **Mac (Spotlight tool):** Shapes (rect, rounded rect, oval, polygon) · Properties: **Color** (màu nền dimming) · **Opacity** · **Blur** (độ rõ nền) · **Apply only to text**. Click-drag set vùng; white resize; green rotate.
-- **Windows:** làm qua **Selection + Spotlight & Magnify effect** (Effects). → trên Windows đây là **effect**, không phải tool.
-- **Ưu tiên:** **sau** (P4+). Lưu ý: trên clone nên hiện thực như **tool thống nhất** (không phân hoá Win/Mac), nhưng phần "dim + blur surround" gần effect → có thể đặt logic ở `ezsnag_effects` (SPEC 03) và expose như tool.
-- **Clone:** `EzsnagSpotlightItem : QGraphicsItem` phủ toàn canvas: vùng spotlight = "lỗ" (clear), phần còn lại = overlay màu + blur theo opacity. Dùng `QPainterPath` (canvas rect trừ spotlight shape).
-- **Điểm chưa chắc:** ranh giới tool-vs-effect khác nhau Win/Mac (research §4.18, §8) — clone chọn **một** mô hình; verify UX.
+- **Spotlight:** xem **SPEC 03 §03.13** (Spotlight & Magnify effect) — Ezsnagit dùng mô hình **effect baked**; ở đây **không định nghĩa lại**. (Khác với **Magnify §02.16**, vốn là object vector sống.)
 
 ### 02.19 Eyedropper (Color picker)
 - **Mô tả:** KHÔNG phải tool canvas độc lập — là **control dùng chung** trong mọi color dropdown. Click eyedropper → sample pixel bất kỳ trên màn hình/ảnh → áp vào color hiện tại của tool (fill/outline/text…).
@@ -254,12 +255,14 @@ CanvasDocument
 
 ## Quick Styles / Themes / màu
 
-### Quick Styles (tool presets)
+### Quick Styles (tool presets) — ⭐MVP P3
 - Mỗi tool có **Quick Styles** mặc định (tổ hợp property cho 1-click). **Lưu custom:** chỉnh property → preview style mới hiện dưới → click **+/save**. **Reorder:** kéo. **Delete:** right-click → Delete Quick Style.
+- **Ưu tiên:** **⭐MVP P3** — đây là **linh hồn tốc độ** của annotation (REVIEW finding 1: Quick Styles là lý do annotate nhanh, research 06/09 xếp core). Làm ngay cùng các tool mà nó style, không để "sau".
 - **Clone:** `ezsnag_annotations` định nghĩa `ToolStyle` (struct property theo tool) serialize JSON; UI `QuickStylesStrip` render preview. Lưu vào preferences (SPEC 10).
 
-### Favorites
+### Favorites — ⭐MVP P3
 - Click **star** trên Quick Style/Quick Effect → thêm vào **Favorites** (bộ chung, cross-tool). Star vàng = đã lưu; click lại bỏ.
+- **Ưu tiên:** **⭐MVP P3** (đi kèm Quick Styles — speed soul của annotation).
 - **Clone:** flag `favorite` trên `ToolStyle`; view Favorites lọc cross-tool.
 
 ### Themes (brand/theme colors)
@@ -302,25 +305,26 @@ CanvasDocument
 |---|---|---|
 | **Canvas Object Graph** (model, z-order, undo/redo, flatten, serialize) | **MVP P3** | Nền tảng — làm trước mọi tool |
 | Move tool (cơ bản: select/move/resize/rotate/delete/restyle) | **MVP P3** | Cổng re-edit, bắt buộc |
-| Arrow | **MVP P3** | Bezier = sau |
-| Text | **MVP P3** | Outline/Select-All cơ bản |
-| Callout | **MVP P3** | Gradient/multi-tail = sau |
-| Shape (rect/ellipse/polygon) | **MVP P3** | |
+| Arrow | **⭐MVP P3** | MVP-A; Bezier = sau |
+| Text | **⭐MVP P3** | MVP-A; Outline/Select-All cơ bản |
+| Callout | **⭐MVP P3** | MVP-A; Gradient/multi-tail = sau |
+| Shape / Box (rect/ellipse/polygon) | **⭐MVP P3** | MVP-A |
 | Line | **MVP P3** | Bezier = sau |
-| Highlight | **MVP P3** | Chỉ rect ở MVP |
-| Step (numbers/circle) | **MVP P3** | Letters/Roman/shape = sau |
+| Highlight | **⭐MVP P3** | MVP-A; chỉ rect ở MVP |
+| Step (thủ công — numbers/circle) | **⭐MVP-B (P3)** | Letters/Roman/shape = sau |
+| **Step-Capture (auto chụp khi click)** | **P10 (fast-follow)** | Flagship doc feature; OS-integration nặng (mouse hook + UIA). KHÁC Step tool |
 | Stamp (local lib + import PNG) | **MVP P3** | GIF động + cloud Assets = sau |
 | Pen (vector mode) | **MVP P3** | Raster mode + smoothing = sau |
-| Blur / Pixelate / Solid | **MVP P3** | Smart Redact = sau |
-| Crop | **MVP P3** | |
+| Blur / Pixelate / Solid | **⭐MVP P3** | MVP-A; redact AN TOÀN = solid; Smart Redact = sau |
+| Crop | **⭐MVP P3** | MVP-A |
 | Per-object rotate + image rotate/flip | **MVP P3** | Per-object flip = sau |
 | Eyedropper (trong canvas) | **MVP P3** | Toàn màn hình = sau |
 | Arrange z-order (front/back/forward/backward) | **MVP P3** | |
 | Undo/redo, copy/paste, Shift-constrain | **MVP P3** | |
 | Color picker (HEX/RGB/theme) | **MVP P3** | Gradient = sau |
-| Quick Styles (save/reorder/delete/Favorites) | **P3+/sau** | Lưu preset |
-| Magnify | **sau (P4+)** | |
-| Spotlight | **sau (P4+)** | Tool-vs-effect cần chốt |
+| Quick Styles + Favorites (save/reorder/delete) | **⭐MVP P3** | Speed soul của annotation (REVIEW finding 1) |
+| Magnify (object sống) | **sau (P4+)** | |
+| Spotlight | **→ SPEC 03 §03.13** | Effect baked; không định nghĩa ở SPEC 02 |
 | Fill (bucket) | **sau (P4+)** | Raster |
 | Eraser | **sau (P4+)** | Raster, brush chưa rõ |
 | Selection (rect/ellipse/poly/lasso) | **sau (P4+)** | Auto-Fill inpaint = gác lâu |
@@ -343,8 +347,8 @@ Giữ nguyên các uncertainty từ research §9 + bổ sung quyết định clo
 4. **Duplicate shortcut** — phím riêng (Ctrl/Cmd+D?) chưa xác nhận (§7, §9.4). Clone tạm gán Ctrl+D.
 5. **Align / Distribute** — lệnh rõ ràng ngoài Canvas Snapping chưa xác nhận (§6, §9.5). Verify.
 6. **Z-order command wording** (bring to front / send to back) chưa chốt (§9.6).
-7. **Blur là raster hay object** — docs xếp gần raster nhưng re-editable. Clone chọn **object hoá** (re-edit, flatten khi export); xác nhận hành vi mong muốn.
-8. **Spotlight tool-vs-effect** khác Win/Mac (§4.18, §8) — clone thống nhất một mô hình; verify UX kỳ vọng.
+7. **Blur là raster hay object** — docs xếp gần raster nhưng re-editable. Clone chọn **object hoá** (re-edit, flatten khi export); xác nhận hành vi mong muốn. **Lưu ý security:** vì object-blur reversible tới khi flatten → redact AN TOÀN phải là **solid shape** (xem §02.17).
+8. ~~Spotlight tool-vs-effect~~ — **ĐÃ CHỐT:** Spotlight là **effect baked**, ownership ở **SPEC 03 §03.13**; SPEC 02 chỉ cross-reference (§02.18). Magnify (§02.16) vẫn là object sống. *(Ambiguity cũ đã resolve.)*
 9. **Cross-platform effect loss** (SNAGX Mac → Windows mất effect) (§2 caveat) — clone single-codebase Qt nên không gặp; nhưng `.ezsnagx` phải định nghĩa rõ effect serialization (SPEC 03/09).
 10. **Recent features version-gated** (Select-All-like-objects, Smart Move, Smart Redact, Simplify color palettes) — xác nhận với build Snagit 2026 (research kết luận §9, §10).
 

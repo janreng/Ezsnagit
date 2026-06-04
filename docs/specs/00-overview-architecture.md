@@ -96,4 +96,4 @@ Các project có sẵn giải đúng những cơ chế Ezsnagit cần. Tham kh�
 - **Tạm gác / khó**: tích hợp cloud bản quyền (Screencast.com, Slack/Teams OAuth), Smart Move/Simplify mức AI cao, multitrack video (đó là Camtasia).
 - **Khác Snagit có chủ đích**: tên format `.ezsnagx`; OCR dùng Tesseract (không phải ABBYY); video encode bằng FFmpeg.
 
-Xem `ROADMAP.md` cho thứ tự triển khai P0–P12.
+Xem `ROADMAP.md` cho thứ tự triển khai P0–P13 (MVP định nghĩa theo workflow).

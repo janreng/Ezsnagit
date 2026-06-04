@@ -36,7 +36,8 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
     - **Combine in Template** (nhiều ảnh) → chọn template, **reorder** thumbnail, thêm title/theme, bật **step numbering**.
     - **Apply Template** (một ảnh).
 - **Edit lại template-based image:** mở lại sửa layout, swap ảnh, reorder, đổi theme… (giữ editable khi còn `.ezsnagx`).
-- **Ưu tiên:** P1 (vài layout cơ bản + drop zone + scaling + step numbering); P2 (theme/title/footer nâng cao, asset pack ngoài).
+- **Ưu tiên:** **⭐MVP-B (ROADMAP P5.5)** cho **bộ nhỏ** (layout cạnh-nhau / đánh-số / before-after + drop zone + scaling + step numbering) — đây là mảnh hoàn tất doc-steps loop. **Bộ đầy đủ** (theme/title/footer nâng cao, asset pack ngoài) → **P11**.
+  *(Chốt mâu thuẫn cũ "P1 vs P11": bộ nhỏ vào MVP-B, bộ đầy đủ P11 — khớp ROADMAP v2.)*
 - **Ghi chú clone C++/Qt:**
   - Template = file mô tả layout (JSON): danh sách **drop zone** (rect + scale mode), **text slot**, **step-number config**, **theme tham chiếu**, **footer**. Lưu trong `ezsnag_templates/templates/`.
   - Khi Create: dựng một document `.ezsnagx` mới từ template → drop zone là **ImageObject placeholder**; text slot là TextObject; step number là StepObject (tái dùng annotation của `ezsnag_canvas`).
@@ -47,7 +48,7 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
 ### 08.2 Apply Template (ảnh đơn)
 
 - **Mô tả:** áp một template cho một ảnh đơn (frame/title/footer hóa một capture).
-- **Ưu tiên:** P2.
+- **Ưu tiên:** P11 (cùng đợt bộ template đầy đủ).
 - **Ghi chú clone C++/Qt:** trường hợp đặc biệt của 08.1 với layout 1 drop zone; tái dùng cùng engine dựng layout.
 
 ### 08.3 Create Video from Images
@@ -59,7 +60,7 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
   3. Bắt đầu record — Shift+F9 (Win) / Ctrl+Shift+Space (Mac).
   4. Trong khi record: thêm **arrow, shape, step number, annotation** lên ảnh live.
   5. Dừng — Shift+F10 (Win) / Ctrl+Shift+V (Mac).
-- **Ưu tiên:** P2 (phụ thuộc `ezsnag_video` đã có record + mic; annotate-live phức tạp).
+- **Ưu tiên:** P11 (phụ thuộc `ezsnag_video` đã có record + mic; annotate-live phức tạp).
 - **Ghi chú clone C++/Qt:**
   - Ủy quyền capture/encode cho **`ezsnag_video`** (FFmpeg/Qt Multimedia): scene = ảnh hiển thị full-screen/canvas; record màn hình của khung trình chiếu + mic.
   - Annotate live = vẽ annotation object lên trên ảnh trong lúc record; recorder capture frame của khung đó.
@@ -80,12 +81,12 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
 
 | ID | Tính năng | Ưu tiên |
 |---|---|---|
-| 08.1 | Combine Images: layout cơ bản + drop zone + scaling | P1 |
-| 08.1 | Step numbering tự động + reorder | P1 |
-| 08.1 | Title / theme / footer attribution nâng cao | P2 |
-| 08.1 | Nạp asset pack template ngoài | P2 |
-| 08.2 | Apply Template (ảnh đơn) | P2 |
-| 08.3 | Video from Images (record + annotate live) | P2 |
+| 08.1 | Combine Images: bộ nhỏ (cạnh-nhau/đánh-số/before-after) + drop zone + scaling | ⭐MVP-B (P5.5) |
+| 08.1 | Step numbering tự động + reorder | ⭐MVP-B (P5.5) |
+| 08.1 | Title / theme / footer attribution nâng cao | P11 |
+| 08.1 | Nạp asset pack template ngoài | P11 |
+| 08.2 | Apply Template (ảnh đơn) | P11 |
+| 08.3 | Video from Images (record + annotate live) | P11 |
 
 ## Điểm chưa chắc
 

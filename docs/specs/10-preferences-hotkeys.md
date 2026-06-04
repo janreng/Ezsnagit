@@ -30,17 +30,17 @@ Trung tâm cấu hình của app: Preferences theo tab + hệ phím tắt toàn 
   | Hủy | `Esc` |
   | Repeat Last Capture | (cần verify — research §10) |
 - **Tùy chọn:** cho phép **đổi/gán lại** mọi hotkey; cảnh báo xung đột (vd Print Screen bị Snipping Tool Win11 chiếm); bật tích hợp Print Screen.
-- **Ưu tiên:** 1 hotkey global cơ bản = P1; tùy biến đầy đủ = P12.
+- **Ưu tiên:** **⭐MVP P1** — cả 1 hotkey global cơ bản LẪN khả năng **đổi/gán lại**. (REVIEW finding 1: hotkey là "linh hồn" tốc độ, KHÔNG để P12. Người dùng phải đổi được vì Print Screen hay đụng Snipping Tool Win11 — chính spec này ghi nhận xung đột đó.) Default Repeat-Last-Capture = `Ctrl+Shift+R` (khớp SPEC 01 §01.22).
 - **Ghi chú clone C++/Qt:** đăng ký global hotkey trên Windows qua `RegisterHotKey` (Win32) — Qt không có API global hotkey sẵn, cần lớp platform (hoặc thư viện `QHotkey`). Lưu mapping trong `QSettings`.
 
 ### 10.3 Theme (giao diện app)
 - **Mô tả:** Light / Dark / theo hệ thống — như Snagit.
-- **Ưu tiên:** P12 (polish).
+- **Ưu tiên:** P13 (polish).
 - **Ghi chú clone C++/Qt:** Qt stylesheet (QSS) hoặc `QStyleHints::colorScheme` (Qt 6.5+); palette tùy biến.
 
 ### 10.4 Brand Themes & Quick Styles (khác với theme app)
 - **Mô tả:** bộ màu thương hiệu + font tạo ra Quick Styles cho annotation (xem SPEC 02 §Quick Styles). Khác với theme giao diện app.
-- **Ưu tiên:** P12.
+- **Ưu tiên:** P13.
 - **Ghi chú clone:** lưu file `.ezsnagtheme` (JSON), nạp vào palette tool properties.
 
 ### 10.5 Cập nhật (auto-update)
@@ -52,9 +52,9 @@ Trung tâm cấu hình của app: Preferences theo tab + hệ phím tắt toàn 
 | Tính năng | Phase |
 |---|---|
 | Khung Preferences + Capture/Editor tab | P1–P2 |
-| 1 global hotkey chụp | P1 |
+| Global hotkey chụp + **đổi/gán lại hotkey** | ⭐MVP P1 |
 | Share/Library tab | P5–P6 |
-| Theme app, tùy biến hotkey đầy đủ, Quick Style themes | P12 |
+| Theme app (light/dark), Quick Style themes nâng cao, command palette | P13 |
 | Auto-update | sau MVP |
 
 ## Điểm chưa chắc / cần verify

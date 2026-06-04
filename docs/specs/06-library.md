@@ -57,7 +57,9 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
   - **Flags** — visual marker người dùng gán (searchable)
   - **Favorites** — (Mac) mục đánh dấu yêu thích
 - **Sorting:** theo **date modified, date created, name, size**; click heading để sort / đảo chiều.
-- **Ưu tiên:** P0 cho search filename + filter File Type/Date + sort; P1 cho Applications/Websites/Tags/Flags; P2 cho Favorites (Mac).
+- **Ưu tiên:**
+  - **⭐MVP (P5):** search theo **tên / ngày / type** (filename + File Type/Date filter + sort) — đủ cho daily loop.
+  - **fast-follow (P-sau):** filter đầy đủ **Applications/Websites/Tags/Flags/Favorites** — KHÔNG gate MVP (theo REVIEW §1.2: URL/app/tag filtering là fast-follow, không phải MVP-blocking).
 - **Ghi chú clone C++/Qt:**
   - View = grid thumbnail (`QListView` IconMode) + sidebar filter (cây category). Backing model là proxy trên dữ liệu SQLite.
   - Filter categories **auto-generated**: thực thi `SELECT DISTINCT`/`GROUP BY` trên các cột metadata (`source_app`, `source_url`, `file_type`, `created_at`) và bảng `tags`/`flags`. Date group bằng query nhóm theo `strftime` năm/tháng/ngày.
@@ -100,6 +102,27 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
   - Mặc định store ở `QStandardPaths::AppDataLocation`/`<app>/Library/` chứa DB `library.db` (SQLite) + thư mục `store/` chứa các file `.ezsnagx`/`.mp4` (đặt tên theo UUID).
   - Di chuyển location = move file + cập nhật đường dẫn base (DB chỉ lưu **đường dẫn tương đối** trong store để move không vỡ tham chiếu).
 
+### 06.7 Backup/Restore & độ tin cậy Library
+
+- **Mô tả:** Library là tài sản người dùng tích lũy lâu dài — mất Library là **mất niềm tin không thể vãn hồi**. (Snagit từng **mất sạch Library sau khi update app** — research 06 §2.4.) Ezsnagit phải đảm bảo:
+  - **Auto-backup định kỳ:** tự sao lưu DB + store **mỗi N lần ghi** (cấu hình được), giữ vài bản gần nhất theo vòng (rotate).
+  - **Export/Import toàn kho:** **1 nút** export toàn bộ Library (DB + file `.ezsnagx`/`.mp4`) thành một gói duy nhất, và import lại trên máy khác hoặc sau khi cài lại.
+  - **Sống sót qua update app:** store + DB nằm **ngoài** thư mục cài đặt; update binary KHÔNG được đụng tới Library. Schema migration phải an toàn (backup trước khi migrate, có đường rollback).
+  - **An toàn khi store nằm trong cloud-sync** (OneDrive/Dropbox/Drive): ghi atomic + tránh giữ lock dài để sync không gây hỏng/đụng độ file.
+- **Ưu tiên:** **⭐MVP (P5)** — đây là yêu cầu trust, không phải "để sau".
+- **Cross-ref:** SPEC 12 §12.3 (Độ tin cậy Library — trust dealbreaker).
+- **Ghi chú clone C++/Qt:**
+  - Backup = snapshot atomic DB (SQLite `VACUUM INTO` hoặc backup API) + copy/hardlink các file store tham chiếu; gói export là một archive (vd `.zip`/thư mục có manifest version).
+  - Đếm số lần ghi qua counter persistent; trigger backup khi đạt ngưỡng N, chạy trên thread nền.
+  - Migration: kiểm tra `schema_version`, backup tự động trước khi nâng cấp schema.
+
+### 06.8 Crash-recovery (phục hồi sau crash)
+
+- **Mô tả:** capture **chưa kịp lưu** (đang edit, hoặc video đang finalize) phải **phục hồi được sau crash**. (Snagit mất capture khi crash lúc finalize video — research 08 §9.) Khi khởi động lại, app dò journal/temp và đề nghị khôi phục document dở dang.
+- **Ưu tiên:** **⭐MVP (P5)**.
+- **Cross-ref:** SPEC 12 §12.4 (Crash-safety & phục hồi).
+- **Ghi chú clone C++/Qt:** ghi tạm ngay khi tạo document (§06.1 atomic write); video stream thẳng xuống đĩa khi quay; lưu marker "đang mở/đang ghi" để phát hiện document chưa đóng sạch ở lần khởi động kế.
+
 ---
 
 ## Bảng ưu tiên
@@ -109,15 +132,16 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
 | 06.1 | Auto-save `.ezsnagx`/`.mp4` + cảnh báo lỗi | P0 |
 | 06.2 | Recent Captures Tray (hiển thị + load) | P0 |
 | 06.2 | Tray pin / reorder | P1 |
-| 06.3 | Library View: search filename + File Type/Date filter + sort | P0 |
-| 06.3 | Filter Applications/Websites/Tags/Flags | P1 |
-| 06.3 | Favorites (Mac) | P2 |
+| 06.3 | Library View: search **tên/ngày/type** + File Type/Date filter + sort | **⭐MVP (P5)** |
+| 06.3 | Filter Applications/Websites/Tags/Flags/Favorites | **fast-follow (P-sau)** |
 | 06.4 | Tags | P1 |
 | 06.4 | Flags | P1 |
 | 06.5 | Open/Select/Delete | P0 |
 | 06.5 | Metadata view + context-menu Templates | P1 |
 | 06.6 | Store mặc định + DB | P0 |
 | 06.6 | Di chuyển Library location | P2 |
+| 06.7 | Backup/restore (auto-backup + export/import) + an toàn cloud-sync + sống sót update | **⭐MVP (P5)** |
+| 06.8 | Crash-recovery (phục hồi capture chưa lưu) | **⭐MVP (P5)** |
 
 ## Điểm chưa chắc
 
@@ -125,4 +149,4 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
 - **Favorites** là Mac-only ở Snagit; với clone có thể nâng thành flag chung "Favorite" thay vì giữ phân biệt nền tảng — cần quyết định.
 - **Flags** lưu bitmask (tập cố định) vs bảng riêng (cho phép custom flag tương lai) — chọn bitmask trước, để ngỏ migration.
 - Metadata **source_app / source_url** phụ thuộc engine capture có lấy được context cửa sổ/URL không (liên quan `ezsnag_capture`); có thể null trong bản đầu.
-- Cơ chế **backup import** (Preferences > Library) chưa scope ở spec này — cần spec riêng nếu làm.
+- **Backup/restore** (§06.7) đã đưa vào MVP (P5), không còn ngoài scope. Còn để ngỏ: ngưỡng N lần ghi mặc định cho auto-backup, số bản backup giữ lại (rotate), và định dạng gói export (zip vs thư mục có manifest) — chọn giá trị hợp lý, tinh chỉnh theo thực tế.

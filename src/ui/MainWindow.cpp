@@ -9,6 +9,7 @@
 #include "hotkey/GlobalHotkey.h"
 #include "share/ImageClipboard.h"
 #include "effects/Transforms.h"
+#include "effects/Filters.h"
 #include "canvas/EzsnagxFile.h"
 
 #include <QScrollArea>
@@ -48,6 +49,16 @@ MainWindow::MainWindow(QWidget *parent)
     QAction *expAct  = fileMenu->addAction(QStringLiteral("Xuất PNG…"), this, &MainWindow::exportPng);
     Q_UNUSED(openAct); Q_UNUSED(saveAct); Q_UNUSED(expAct);
 
+    // --- Menu Hiệu ứng (áp lên ảnh đã gộp annotation) ---
+    QMenu *fxMenu = menuBar()->addMenu(QStringLiteral("&Hiệu ứng"));
+    auto applyFilter = [this](QImage (*fn)(const QImage &)) {
+        if (!m_canvas->hasImage()) return;
+        m_canvas->setImage(fn(m_canvas->document().renderFlattened()));
+    };
+    fxMenu->addAction(QStringLiteral("Trắng đen"), this, [applyFilter] { applyFilter(effects::grayscale); });
+    fxMenu->addAction(QStringLiteral("Sepia"),     this, [applyFilter] { applyFilter(effects::sepia); });
+    fxMenu->addAction(QStringLiteral("Đảo màu"),   this, [applyFilter] { applyFilter(effects::invert); });
+
     // --- Toolbar chụp ---
     auto *tb = addToolBar(QStringLiteral("Chụp"));
     tb->setMovable(false);
@@ -77,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
     addTool(QStringLiteral("Chữ"), ObjType::Text, false);
     addTool(QStringLiteral("Số bước"), ObjType::Step, false);
     addTool(QStringLiteral("Làm mờ"), ObjType::Blur, false);
+    addTool(QStringLiteral("Cắt"), ObjType::Crop, false);
     m_canvas->setTool(ObjType::Arrow);
 
     atb->addAction(QStringLiteral("Màu…"), this, [this] {

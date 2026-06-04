@@ -30,9 +30,11 @@ protected:
 
 private:
     QRect selectionWidgetRect() const; // vùng chọn theo toạ độ widget (chuẩn hoá)
+    void updateMagnifier(const QPoint &cursor);
 
     QImage m_frozen;
     bool m_selecting = false;
     bool m_done = false;               // đã phát regionSelected/cancelled chưa
     QPoint m_start, m_cur;
+    class Magnifier *m_mag = nullptr;  // kính lúp theo con trỏ
 };

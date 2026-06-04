@@ -1,4 +1,5 @@
 #include "ui/RegionOverlay.h"
+#include "ui/Magnifier.h"
 #include "capture/ScreenGeometry.h"
 
 #include <QPainter>
@@ -15,6 +16,21 @@ RegionOverlay::RegionOverlay(const QImage &frozen, const QRect &overlayGeometry,
     setGeometry(overlayGeometry);
     setCursor(Qt::CrossCursor);
     setMouseTracking(true);
+    m_mag = new Magnifier(this);   // kính lúp con, hiện khi di chuột
+}
+
+// Đặt kính lúp gần con trỏ (lệch để không che vùng đang ngắm), trong biên overlay.
+void RegionOverlay::updateMagnifier(const QPoint &cursor)
+{
+    if (!m_mag) return;
+    const QPoint imgPt = capture::mapWidgetPointToImage(cursor, size(), m_frozen.size());
+    m_mag->showAt(m_frozen, imgPt, 8);
+    QPoint pos = cursor + QPoint(20, 20);
+    if (pos.x() + m_mag->width() > width())  pos.setX(cursor.x() - 20 - m_mag->width());
+    if (pos.y() + m_mag->height() > height()) pos.setY(cursor.y() - 20 - m_mag->height());
+    m_mag->move(pos);
+    m_mag->show();
+    m_mag->raise();
 }
 
 QRect RegionOverlay::selectionWidgetRect() const
@@ -60,11 +76,13 @@ void RegionOverlay::mousePressEvent(QMouseEvent *e)
 void RegionOverlay::mouseMoveEvent(QMouseEvent *e)
 {
     if (m_selecting) { m_cur = e->pos(); update(); }
+    updateMagnifier(e->pos());   // kính lúp theo con trỏ (cả khi chưa kéo)
 }
 
 void RegionOverlay::mouseReleaseEvent(QMouseEvent *e)
 {
     if (e->button() != Qt::LeftButton || !m_selecting) return;
+    if (m_mag) m_mag->hide();
     m_selecting = false;
     const QRect sel = selectionWidgetRect();
     if (sel.width() < 3 || sel.height() < 3) { close(); return; }   // quá nhỏ -> hủy

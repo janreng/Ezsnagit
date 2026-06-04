@@ -14,7 +14,7 @@ namespace canvas {
 // Box/Highlight/Text dùng rect chuẩn hoá. Arrow/Line dùng rect KHÔNG chuẩn hoá
 // (topLeft=điểm đầu, bottomRight=điểm cuối) để giữ hướng. Step = badge số thứ tự
 // (số lưu trong text). Blur KHÔNG phải object lưu trữ (được "nung" thẳng vào nền).
-enum class ObjType { Arrow, Box, Highlight, Text, Line, Step, Blur };
+enum class ObjType { Arrow, Box, Highlight, Text, Line, Step, Blur, Crop };
 
 struct AnnotationObject {
     ObjType type = ObjType::Box;
@@ -102,7 +102,8 @@ inline void paintObject(QPainter &p, const AnnotationObject &o) {
         break;
     }
     case ObjType::Blur:
-        break; // Blur được nung vào nền, không vẽ như object.
+    case ObjType::Crop:
+        break; // Blur/Crop xử lý thẳng trên ảnh nền, không vẽ như object.
     }
     p.restore();
 }

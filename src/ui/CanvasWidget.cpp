@@ -1,5 +1,6 @@
 #include "CanvasWidget.h"
 #include "effects/Blur.h"
+#include "effects/Transforms.h"
 
 #include <QPainter>
 #include <QMouseEvent>
@@ -147,6 +148,13 @@ void CanvasWidget::mouseReleaseEvent(QMouseEvent *e)
     if (m_tool == ObjType::Blur) {
         m_doc.setBackground(effects::blurRegion(m_doc.background(), rect.normalized()));
         update();
+        return;
+    }
+
+    // Crop: cắt ảnh (đã gộp annotation) theo vùng chọn -> thành ảnh mới.
+    if (m_tool == ObjType::Crop) {
+        const QImage cropped = effects::crop(m_doc.renderFlattened(), rect.normalized());
+        if (!cropped.isNull()) setImage(cropped);  // setImage tự clear annotation cũ
         return;
     }
 

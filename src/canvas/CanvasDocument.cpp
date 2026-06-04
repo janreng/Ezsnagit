@@ -37,6 +37,7 @@ QString typeToStr(ObjType t) {
     case ObjType::Line: return "line";
     case ObjType::Step: return "step";
     case ObjType::Blur: return "blur";
+    case ObjType::Crop: return "crop";
     }
     return "box";
 }
@@ -48,6 +49,7 @@ ObjType typeFromStr(const QString &s) {
     if (s == "line") return ObjType::Line;
     if (s == "step") return ObjType::Step;
     if (s == "blur") return ObjType::Blur;
+    if (s == "crop") return ObjType::Crop;
     return ObjType::Box;
 }
 

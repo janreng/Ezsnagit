@@ -1,4 +1,5 @@
 #include "ui/MainWindow.h"
+#include "ui/RegionOverlay.h"
 #include "core/Version.h"
 #include "capture/ScreenCapture.h"
 
@@ -10,6 +11,8 @@
 #include <QPixmap>
 #include <QImage>
 #include <QTimer>
+#include <QGuiApplication>
+#include <QScreen>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,6 +23,10 @@ MainWindow::MainWindow(QWidget *parent)
     // Thanh công cụ tối giản (P1): chụp toàn màn hình.
     auto *tb = addToolBar(QStringLiteral("Capture"));
     tb->setMovable(false);
+    QAction *regAct = tb->addAction(QStringLiteral("Chụp vùng"));
+    regAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+A")));
+    connect(regAct, &QAction::triggered, this, &MainWindow::captureRegion);
+
     QAction *capAct = tb->addAction(QStringLiteral("Chụp toàn màn hình"));
     capAct->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+F")));
     connect(capAct, &QAction::triggered, this, &MainWindow::captureFullScreen);
@@ -54,6 +61,38 @@ void MainWindow::captureFullScreen()
             return;
         }
         showCaptured(img);
+    });
+}
+
+void MainWindow::captureRegion()
+{
+    hide();
+    QTimer::singleShot(200, this, [this] {
+        const QImage full = capture::captureVirtualDesktop();
+        if (full.isNull()) {
+            show();
+            statusBar()->showMessage(QStringLiteral("Chụp thất bại (nền tảng chưa hỗ trợ?)"), 4000);
+            return;
+        }
+        // Vùng logical phủ hết các màn hình (để overlay che toàn bộ).
+        QRect vg;
+        for (const QScreen *s : QGuiApplication::screens())
+            vg = vg.united(s->geometry());
+
+        auto *ov = new RegionOverlay(full, vg);
+        ov->setAttribute(Qt::WA_DeleteOnClose);
+        connect(ov, &RegionOverlay::regionSelected, this, [this](const QImage &img) {
+            show(); raise(); activateWindow();
+            showCaptured(img);
+        });
+        connect(ov, &RegionOverlay::cancelled, this, [this] {
+            show(); raise(); activateWindow();
+            statusBar()->showMessage(QStringLiteral("Đã hủy chụp vùng"), 2000);
+        });
+        ov->show();
+        ov->raise();
+        ov->activateWindow();
+        ov->setFocus();
     });
 }
 

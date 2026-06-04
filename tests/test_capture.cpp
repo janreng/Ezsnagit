@@ -44,6 +44,26 @@ int main() {
         ok(clampToBounds(QRect(5000,5000,100,100), b).isEmpty(), "clamp ngoai han -> rong");
     }
 
+    // mapWidgetRectToImage: tỉ lệ 1:1 (cùng kích thước).
+    {
+        QRect r = capture::mapWidgetRectToImage(QRect(10,20,100,50), QSize(800,600), QSize(800,600));
+        ok(r == QRect(10,20,100,50), "map 1:1");
+    }
+    // mapWidgetRectToImage: ảnh gấp đôi widget (HiDPI dpr=2) -> nhân đôi.
+    {
+        QRect r = capture::mapWidgetRectToImage(QRect(10,20,100,50), QSize(800,600), QSize(1600,1200));
+        ok(r == QRect(20,40,200,100), "map dpr=2 nhan doi");
+    }
+    // mapWidgetRectToImage: tràn biên -> kẹp trong ảnh.
+    {
+        QRect r = capture::mapWidgetRectToImage(QRect(700,0,200,100), QSize(800,600), QSize(800,600));
+        ok(r == QRect(700,0,100,100), "map tran phai -> kep");
+    }
+    // mapWidgetRectToImage: kích thước rỗng -> rỗng.
+    {
+        ok(capture::mapWidgetRectToImage(QRect(0,0,10,10), QSize(), QSize(100,100)).isEmpty(), "map widget rong -> rong");
+    }
+
     std::printf("test_capture: %d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

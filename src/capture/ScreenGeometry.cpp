@@ -16,4 +16,13 @@ QRect clampToBounds(const QRect &r, const QRect &bounds) {
     return g.isEmpty() ? QRect() : g;
 }
 
+QRect mapWidgetRectToImage(const QRect &sel, const QSize &widgetSize, const QSize &imageSize) {
+    if (widgetSize.isEmpty() || imageSize.isEmpty()) return QRect();
+    const double sx = double(imageSize.width())  / widgetSize.width();
+    const double sy = double(imageSize.height()) / widgetSize.height();
+    const QRect mapped(qRound(sel.x() * sx), qRound(sel.y() * sy),
+                       qRound(sel.width() * sx), qRound(sel.height() * sy));
+    return mapped.intersected(QRect(QPoint(0, 0), imageSize));
+}
+
 } // namespace capture

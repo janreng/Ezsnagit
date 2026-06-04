@@ -4,8 +4,10 @@
 #include "ui/CanvasWidget.h"
 #include "ui/StyleBar.h"
 #include "ui/PanoramicDialog.h"
+#include "ui/RecentTray.h"
 #include "capture/StitchMany.h"
 #include "canvas/QuickStyle.h"
+#include "core/Settings.h"
 #include "core/Version.h"
 #include "capture/ScreenCapture.h"
 #include "hotkey/GlobalHotkey.h"
@@ -29,6 +31,8 @@
 #include <QScreen>
 #include <QFileDialog>
 #include <QColorDialog>
+#include <QDockWidget>
+#include <QDir>
 
 using canvas::ObjType;
 
@@ -46,11 +50,32 @@ MainWindow::MainWindow(QWidget *parent)
     m_scroll->setAlignment(Qt::AlignCenter);
     setCentralWidget(m_scroll);
 
+    // Khay ảnh chụp gần đây (dock dưới).
+    auto *recentDock = new QDockWidget(QStringLiteral("Ảnh gần đây"), this);
+    recentDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    m_recent = new RecentTray(recentDock);
+    recentDock->setWidget(m_recent);
+    addDockWidget(Qt::BottomDockWidgetArea, recentDock);
+    connect(m_recent, &RecentTray::captureChosen, this, [this](const QImage &img) {
+        m_canvas->setImage(img);   // mở lại ảnh gần đây (không thêm lại vào khay)
+    });
+
     // --- Menu Tệp ---
     QMenu *fileMenu = menuBar()->addMenu(QStringLiteral("&Tệp"));
     QAction *openAct = fileMenu->addAction(QStringLiteral("Mở…"), QKeySequence::Open, this, &MainWindow::openFile);
     QAction *saveAct = fileMenu->addAction(QStringLiteral("Lưu…"), QKeySequence::Save, this, &MainWindow::saveFile);
     QAction *expAct  = fileMenu->addAction(QStringLiteral("Xuất PNG…"), this, &MainWindow::exportPng);
+    fileMenu->addSeparator();
+    fileMenu->addAction(QStringLiteral("Lưu nhanh PNG"), QKeySequence(QStringLiteral("Ctrl+Shift+S")),
+                        this, &MainWindow::quickSave);
+    fileMenu->addAction(QStringLiteral("Đặt thư mục lưu mặc định…"), this, [this] {
+        const QString dir = QFileDialog::getExistingDirectory(
+            this, QStringLiteral("Chọn thư mục lưu mặc định"), core::Settings::defaultSaveDir());
+        if (!dir.isEmpty()) {
+            core::Settings::setDefaultSaveDir(dir);
+            statusBar()->showMessage(QStringLiteral("Thư mục lưu mặc định: %1").arg(dir), 3000);
+        }
+    });
     Q_UNUSED(openAct); Q_UNUSED(saveAct); Q_UNUSED(expAct);
 
     // --- Menu Hiệu ứng (áp lên ảnh đã gộp annotation) ---
@@ -259,10 +284,28 @@ void MainWindow::captureScrolling()
 void MainWindow::showCaptured(const QImage &img)
 {
     m_canvas->setImage(img);
-    // Tự copy vào clipboard ngay (enabler bug-report loop: chụp -> dán).
-    share::copyImageToClipboard(img);
+    if (m_recent) m_recent->addCapture(img);   // lưu vào khay ảnh gần đây
+    // Tự copy clipboard nếu bật (enabler bug-report loop: chụp -> dán).
+    if (core::Settings::autoCopy())
+        share::copyImageToClipboard(img);
     statusBar()->showMessage(
-        QStringLiteral("Đã chụp %1 × %2 px — đã copy vào clipboard").arg(img.width()).arg(img.height()), 5000);
+        QStringLiteral("Đã chụp %1 × %2 px").arg(img.width()).arg(img.height()), 5000);
+}
+
+void MainWindow::quickSave()
+{
+    if (!m_canvas->hasImage()) {
+        statusBar()->showMessage(QStringLiteral("Chưa có ảnh để lưu"), 2000);
+        return;
+    }
+    const QString dir = core::Settings::defaultSaveDir();
+    QDir().mkpath(dir);
+    const int seq = core::Settings::nextQuickSaveSeq();
+    const QString path = QDir(dir).filePath(QStringLiteral("Ezsnagit-%1.png").arg(seq));
+    if (share::saveImagePng(m_canvas->document().renderFlattened(), path))
+        statusBar()->showMessage(QStringLiteral("Đã lưu nhanh: %1").arg(path), 4000);
+    else
+        statusBar()->showMessage(QStringLiteral("Lưu nhanh thất bại"), 3000);
 }
 
 void MainWindow::copyToClipboard()

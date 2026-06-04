@@ -17,7 +17,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 # --- Core: logic thuần không phụ thuộc GUI (version, util) -> static lib, test headless.
 add_library(ezsnag_core STATIC
-    src/core/Version.cpp src/core/Version.h)
+    src/core/Version.cpp src/core/Version.h
+    src/core/Settings.cpp src/core/Settings.h)
 target_include_directories(ezsnag_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezsnag_core PUBLIC Qt6::Core)
 
@@ -75,6 +76,7 @@ qt_add_executable(Ezsnagit WIN32
     src/ui/StyleBar.cpp src/ui/StyleBar.h
     src/ui/PenWidthPicker.cpp src/ui/PenWidthPicker.h
     src/ui/PanoramicDialog.cpp src/ui/PanoramicDialog.h
+    src/ui/RecentTray.cpp src/ui/RecentTray.h
     resources.qrc
     app.rc)                                   # app.rc: icon cho .exe (Windows)
 target_include_directories(Ezsnagit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -86,6 +88,10 @@ enable_testing()
 add_executable(test_core tests/test_core.cpp)
 target_link_libraries(test_core PRIVATE ezsnag_core Qt6::Core)
 add_test(NAME core COMMAND test_core)
+
+add_executable(test_settings tests/test_settings.cpp)
+target_link_libraries(test_settings PRIVATE ezsnag_core Qt6::Core)
+add_test(NAME settings COMMAND test_settings)
 
 add_executable(test_capture tests/test_capture.cpp)
 target_link_libraries(test_capture PRIVATE ezsnag_capture Qt6::Core Qt6::Gui)

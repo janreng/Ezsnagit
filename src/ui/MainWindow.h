@@ -25,11 +25,13 @@ private slots:
     void openFile();
     void saveFile();
     void exportPng();
+    void quickSave();
 
 private:
     void showCaptured(const QImage &img);
 
     QScrollArea *m_scroll = nullptr;
     CanvasWidget *m_canvas = nullptr;   // editor canvas (ảnh nền + annotation vector)
+    class RecentTray *m_recent = nullptr;
     hotkey::GlobalHotkey *m_hotkey = nullptr;
 };

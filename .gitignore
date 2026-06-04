@@ -1,0 +1,10 @@
+build/
+dist/
+*.user
+.vs/
+CMakeCache.txt
+CMakeFiles/
+_deps/
+*.exe
+*.o
+*.obj

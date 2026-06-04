@@ -1,5 +1,8 @@
 # Ezsnagit — Lịch sử thay đổi
 
+## v0.7.0
+- **Chụp ghép dọc**: chụp lần lượt nhiều khung (cuộn nội dung giữa các lần) rồi tự nối thành một ảnh dài — tiện chụp trang web/đoạn chat dài.
+
 ## v0.6.0
 - Chọn **độ dày nét** cho chú thích (1–12 px).
 - Hiệu ứng ảnh mới: **Thêm viền**, **Đổ bóng**, **Cắt viền thừa** (tự bỏ khoảng trắng quanh ảnh).

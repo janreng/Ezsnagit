@@ -1,6 +1,6 @@
 # UX FLOW 03 — Effects & Transforms (Ezsnagit)
 
-> Nguồn: docs/research/03-effects-ocr.md · Spec: docs/specs/03-effects-transforms.md · Module: `ezsnag_effects`
+> Spec: docs/specs/03-effects-transforms.md · Module: `ezsnag_effects`
 
 Tài liệu mô tả các luồng thao tác từng-bước trong Editor cho effect và transform. Tiền đề chung: người dùng đã có một capture mở trong Editor (canvas = ảnh nền + có thể có annotation object).
 
@@ -9,7 +9,7 @@ Tài liệu mô tả các luồng thao tác từng-bước trong Editor cho effe
 ## Quy ước UI
 
 - **Effects panel:** nút **Effects** trên thanh phải/trên Editor mở panel danh sách effect.
-- **Apply flow (clone, gộp từ Windows):** chọn effect → chỉnh property trong panel → bấm **Apply**. Effect được nung vào canvas (lưu undo trước khi nung).
+- **Apply flow:** chọn effect → chỉnh property trong panel → bấm **Apply**. Effect được nung vào canvas (lưu undo trước khi nung).
 - **Quick Effects:** dải preset; bấm **+** để lưu tổ hợp hiện tại, bấm preset để áp lại 1 click.
 - **Transforms** truy cập qua menu `Image` (Resize / Trim / Canvas Color / Rotate / Flip) hoặc tool trên toolbar (Crop, Cut Out).
 
@@ -114,5 +114,5 @@ Tài liệu mô tả các luồng thao tác từng-bước trong Editor cho effe
 ## Ghi chú trạng thái & undo
 
 - Mọi effect/transform tạo **một undo point** trước khi nung → `Ctrl+Z` gỡ từng bước.
-- Resize/Expand Canvas giữ lịch sử non-destructive qua `ezsnag_canvas` (tương đương `.snagundo` của Snagit).
+- Resize/Expand Canvas giữ lịch sử non-destructive qua `ezsnag_canvas`.
 - Selection-scoped effect (chỉ áp lên vùng chọn) là tùy chọn nâng cao; mặc định mọi effect áp toàn canvas.

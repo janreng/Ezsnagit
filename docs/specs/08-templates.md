@@ -1,6 +1,6 @@
 # SPEC 08 — Templates / Create (Ezsnagit)
 
-> Nguồn: docs/research/05-library-share-templates.md · Module: `ezsnag_templates`
+> Module: `ezsnag_templates`
 
 ## Mục tiêu & phạm vi
 
@@ -12,7 +12,7 @@ Cụm **Create** gom các tính năng ghép nhiều capture thành asset hoàn c
 
 Tất cả tận dụng **canvas object graph** của `ezsnag_canvas`: template là một layout chứa các **drop zone** (vùng thả ảnh) + object text/step number, sản phẩm vẫn editable khi còn ở `.ezsnagx`.
 
-Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi nhận là alternative, không clone.
+Ngoài phạm vi: pipeline video nặng (editor video chuyên dụng) — chỉ ghi nhận là alternative, không làm.
 
 ---
 
@@ -23,7 +23,7 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
 - **Mô tả:** ghép nhiều ảnh thành một visual guide có format. Dùng cho before/after side-by-side, giải thích quy trình/khái niệm, hoặc timeline sự kiện.
 - **Tùy chọn nguồn template:**
   - Tập **built-in basic templates** ship sẵn.
-  - Snagit có thêm layout qua TechSmith Assets (subscription) — với clone: **bộ template nội bộ + có thể nạp thêm từ thư mục/asset pack local** (không subscription).
+  - Mở rộng layout qua asset pack: **bộ template nội bộ + có thể nạp thêm từ thư mục/asset pack local** (không subscription).
   - Template hỗ trợ: **titles, themes, automatic step numbering, footer attribution**.
 - **Flow A — từ đầu:**
   1. Create > **Image from Template** → mở dialog *Create Image from Template*.
@@ -38,7 +38,7 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
 - **Edit lại template-based image:** mở lại sửa layout, swap ảnh, reorder, đổi theme… (giữ editable khi còn `.ezsnagx`).
 - **Ưu tiên:** **⭐MVP-B (ROADMAP P5.5)** cho **bộ nhỏ** (layout cạnh-nhau / đánh-số / before-after + drop zone + scaling + step numbering) — đây là mảnh hoàn tất doc-steps loop. **Bộ đầy đủ** (theme/title/footer nâng cao, asset pack ngoài) → **P11**.
   *(Chốt mâu thuẫn cũ "P1 vs P11": bộ nhỏ vào MVP-B, bộ đầy đủ P11 — khớp ROADMAP v2.)*
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Template = file mô tả layout (JSON): danh sách **drop zone** (rect + scale mode), **text slot**, **step-number config**, **theme tham chiếu**, **footer**. Lưu trong `ezsnag_templates/templates/`.
   - Khi Create: dựng một document `.ezsnagx` mới từ template → drop zone là **ImageObject placeholder**; text slot là TextObject; step number là StepObject (tái dùng annotation của `ezsnag_canvas`).
   - **Scaling:** Fill = scale phủ + clip theo rect zone; Fit = scale giữ tỉ lệ trong rect, letterbox. Lưu mode per-zone để re-edit.
@@ -49,7 +49,7 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
 
 - **Mô tả:** áp một template cho một ảnh đơn (frame/title/footer hóa một capture).
 - **Ưu tiên:** P11 (cùng đợt bộ template đầy đủ).
-- **Ghi chú clone C++/Qt:** trường hợp đặc biệt của 08.1 với layout 1 drop zone; tái dùng cùng engine dựng layout.
+- **Ghi chú implement C++/Qt:** trường hợp đặc biệt của 08.1 với layout 1 drop zone; tái dùng cùng engine dựng layout.
 
 ### 08.3 Create Video from Images
 
@@ -61,7 +61,7 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
   4. Trong khi record: thêm **arrow, shape, step number, annotation** lên ảnh live.
   5. Dừng — Shift+F10 (Win) / Ctrl+Shift+V (Mac).
 - **Ưu tiên:** P11 (phụ thuộc `ezsnag_video` đã có record + mic; annotate-live phức tạp).
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Ủy quyền capture/encode cho **`ezsnag_video`** (FFmpeg/Qt Multimedia): scene = ảnh hiển thị full-screen/canvas; record màn hình của khung trình chiếu + mic.
   - Annotate live = vẽ annotation object lên trên ảnh trong lúc record; recorder capture frame của khung đó.
   - Webcam PiP + cursor overlay tái dùng tính năng video ở SPEC 05.
@@ -94,4 +94,4 @@ Ngoài phạm vi: Camtasia Online/Editor (pipeline video nặng) — chỉ ghi n
 - **Theme system** của template trùng/khác với Quick Styles Theme của Editor (SPEC 02) — cần thống nhất khái niệm "theme" để tránh nhầm.
 - Định dạng file mô tả template (JSON nội bộ) cần version hóa để asset pack tương lai tương thích.
 - **Video from Images** nặng và phụ thuộc `ezsnag_video`; annotate-live + đồng bộ với recorder là phần khó nhất — có thể ship sau khi video core ổn định.
-- Cơ chế **download template** của Snagit (Assets subscription) không clone; thay bằng import thủ công thư mục template — cần quyết định UX import.
+- Cơ chế **download template** qua subscription không làm; thay bằng import thủ công thư mục template — cần quyết định UX import.

@@ -99,7 +99,7 @@
 3. Object được vẽ lại theo z-order mới (object trên đè object dưới).
 4. **Undo** (Ctrl/Cmd+Z) nếu nhầm.
 
-> Ghi chú clone: z-order ↔ `zIndex` trong `CanvasDocument` + `QGraphicsItem::setZValue`; mỗi lệnh là một `ReorderZCommand` trên `QUndoStack`. Label menu (Bring to Front…) là đề xuất clone — cần verify với build Snagit (SPEC 02, Điểm chưa chắc §2/§6).
+> Ghi chú implement: z-order ↔ `zIndex` trong `CanvasDocument` + `QGraphicsItem::setZValue`; mỗi lệnh là một `ReorderZCommand` trên `QUndoStack`. Label menu (Bring to Front…) là đề xuất — cần verify (SPEC 02, Điểm chưa chắc §2/§6).
 
 ---
 
@@ -109,7 +109,7 @@
 2. Right-click → **Group** → các object thành một nhóm; di chuyển/transform chung.
 3. **Ungroup** để tách lại.
 
-> Ưu tiên: sau MVP (SPEC 02). Clone: `QGraphicsItemGroup`.
+> Ưu tiên: sau MVP (SPEC 02). Implement: `QGraphicsItemGroup`.
 
 ---
 

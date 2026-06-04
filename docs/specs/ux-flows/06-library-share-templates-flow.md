@@ -1,7 +1,6 @@
 # UX FLOW (gộp) — Library · Share · Templates (Ezsnagit)
 
-> Nguồn: docs/research/05-library-share-templates.md
-> Spec liên quan: 06-library.md · 07-share-outputs.md · 08-templates.md · 09-file-formats.md
+>> Spec liên quan: 06-library.md · 07-share-outputs.md · 08-templates.md · 09-file-formats.md
 > Module: `ezsnag_library`, `ezsnag_share`, `ezsnag_templates`, `ezsnag_canvas`
 
 Luồng từng-bước xuyên ba cụm: **Library** (tìm/lọc/tag) → **Share** (chọn đích → xuất) → **Templates** (Create from Template, Combine Images). Xem `06-library-flow.md` cho luồng Library chi tiết hơn.
@@ -104,5 +103,5 @@ Luồng từng-bước xuyên ba cụm: **Library** (tìm/lọc/tag) → **Share
 
 - **Win-only:** Email output, Clipboard destination, Program (custom .exe), Printer, X/Twitter, OneNote, Evernote, OneDrive/SharePoint.
 - **Mac-only:** Outlook output, Pages/Keynote/Numbers, native share sheet (AirDrop/Mail/Messages/Notes/Photos/Freeform/Journal/Reminders), tên & shortcut tùy chỉnh per-destination; Favorites trong Library.
-- **Hành vi:** (Snagit) trên Mac file non-`.ezsnagx` flatten khi quit — clone **đề xuất luôn giữ editable**, không bắt chước.
-- Settings: Win = Edit > Editor Preferences; Mac = Snagit menu > Settings.
+- **Hành vi:** Ezsnagit **đề xuất luôn giữ editable** với mọi file (không flatten khi quit).
+- Settings: Win = Edit > Editor Preferences; Mac = menu ứng dụng > Settings.

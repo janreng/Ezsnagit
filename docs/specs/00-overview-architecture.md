@@ -1,6 +1,6 @@
 # SPEC 00 — Tổng quan & Kiến trúc (Ezsnagit)
 
-Tài liệu nền: kiến trúc thông tin (IA) của app + đề xuất kiến trúc module C++/Qt6 để clone Snagit.
+Tài liệu nền: kiến trúc thông tin (IA) của app + đề xuất kiến trúc module C++/Qt6 của Ezsnagit.
 Các spec 01–11 mô tả chi tiết từng cụm tính năng và tham chiếu các module định nghĩa ở đây.
 
 ---
@@ -57,7 +57,7 @@ Mỗi module là một static lib Qt, **logic thuần tách khỏi GUI** để t
 - Mỗi annotation là một **object vector** (không nung vào pixel) → re-edit, di chuyển, đổi z-order.
 - Background = raster (ảnh chụp). Annotation objects nằm trên các layer phía trên.
 - `.ezsnagx` = ảnh nền + danh sách object (kiểu, hình học, style) + metadata → mở lại edit tiếp.
-- Export PNG/JPG = **flatten** toàn bộ object xuống raster (mất khả năng edit, giống Snagit).
+- Export PNG/JPG = **flatten** toàn bộ object xuống raster (mất khả năng edit).
 - Undo/redo trên thao tác object (thêm/sửa/xóa/di chuyển/đổi style) — mô hình giống SpreadsheetModel của Ezcel.
 
 ---
@@ -76,24 +76,14 @@ Mỗi module là một static lib Qt, **logic thuần tách khỏi GUI** để t
 | 08-templates | Create from Template / Combine / Video from Images | `ezsnag_templates` |
 | 09-file-formats | `.ezsnagx` + export raster/video | `ezsnag_canvas`, `ezsnag_library` |
 | 10-preferences-hotkeys | Preferences, theme, hotkey customization | `ui` |
-| 11-platform-editions | Khác biệt nền tảng, phạm vi clone | — |
+| 11-platform-editions | Khác biệt nền tảng, phạm vi | — |
 
 ---
 
-## 3b. Technical precedents (study — KHÔNG copy code)
-
-Các project có sẵn giải đúng những cơ chế Ezsnagit cần. Tham khảo pattern, **không copy mã** (lưu ý GPL):
-
-- **Flameshot** (C++/Qt, GPL) — *tiền lệ kỹ thuật quan trọng nhất*, cùng stack. Học: overlay fullscreen trong suốt để chọn vùng, xử lý **đa màn hình**, vẽ annotation bằng QPainter/Qt, global hotkey, system tray. (research 07 §4)
-- **ShareX** (C#, GPL) — học hành vi **stitch scrolling** và **after-capture task chain / upload pipeline** (kiến trúc destination pluggable). (research 07 §1)
-- **Greenshot** (C#, GPL) — UX **destination picker** nhẹ.
-
-⚠️ GPL: chỉ đọc để hiểu cách tiếp cận; Ezsnagit tự viết. Không nhúng code GPL.
-
-## 4. Ranh giới clone (điều chỉnh kỳ vọng)
+## 4. Ranh giới & phạm vi (điều chỉnh kỳ vọng)
 
 - **Làm tới**: capture ảnh + editor annotation + effects + library + share file/clipboard + OCR + scrolling + video trim/GIF cơ bản.
-- **Tạm gác / khó**: tích hợp cloud bản quyền (Screencast.com, Slack/Teams OAuth), Smart Move/Simplify mức AI cao, multitrack video (đó là Camtasia).
-- **Khác Snagit có chủ đích**: tên format `.ezsnagx`; OCR dùng Tesseract (không phải ABBYY); video encode bằng FFmpeg.
+- **Tạm gác / khó**: tích hợp cloud bản quyền (Slack/Teams OAuth), Smart Move/Simplify mức AI cao, multitrack video editing.
+- **Lựa chọn kỹ thuật chủ đích**: tên format `.ezsnagx`; OCR dùng Tesseract; video encode bằng FFmpeg.
 
 Xem `ROADMAP.md` cho thứ tự triển khai P0–P13 (MVP định nghĩa theo workflow).

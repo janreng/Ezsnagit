@@ -1,6 +1,6 @@
 # SPEC 06 — Library (Ezsnagit)
 
-> Nguồn: docs/research/05-library-share-templates.md · Module: `ezsnag_library`
+> Module: `ezsnag_library`
 
 ## Mục tiêu & phạm vi
 
@@ -22,11 +22,11 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
 - **Mô tả:** mỗi capture ảnh được tự lưu thành file `.ezsnagx` trong Library; mỗi video capture chưa lưu được tự lưu thành `.mp4`. Người dùng **không cần** bấm Save để giữ capture — toàn bộ edit + annotation được persist tự động. Library do đó là lịch sử capture đầy đủ; capture nằm lại cho đến khi người dùng xóa rõ ràng.
 - **Tùy chọn:** trong Preferences > Library có thể tắt *"Tự động lưu image capture mới vào Library"*. Nếu auto-save `.ezsnagx` thất bại → cảnh báo cho người dùng.
 - **Ưu tiên:** P0 (nền tảng — không có auto-save thì không có Library).
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Khi Editor tạo/đổi document, `ezsnag_library` ghi/cập nhật file `.ezsnagx` vào **store** (thư mục do app quản lý) và upsert một bản ghi trong SQLite (`captures`).
   - Ghi an toàn: write tạm `*.tmp` → `QSaveFile` (atomic rename) để tránh hỏng file khi crash giữa chừng. Nếu rename thất bại → phát signal `autoSaveFailed(captureId)` cho UI hiện cảnh báo.
   - Auto-save chạy **debounce** (vd 1–2s sau thao tác cuối) trên thread riêng để không block UI.
-  - Mô hình modern collapse "Unsaved vs Saved" của Snagit cũ: ở Ezsnagit mọi thứ auto-save dạng `.ezsnagx`; "Save As" chỉ là **export** một bản phẳng (PNG/JPG…) ra vị trí người dùng chọn (xem SPEC 09).
+  - Mô hình collapse "Unsaved vs Saved": ở Ezsnagit mọi thứ auto-save dạng `.ezsnagx`; "Save As" chỉ là **export** một bản phẳng (PNG/JPG…) ra vị trí người dùng chọn (xem SPEC 09).
 
 ### 06.2 Recent Captures Tray
 
@@ -38,7 +38,7 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
   - **Unsaved-changes indicator:** icon **"sunburst" sao màu cam** đánh dấu file có edit chưa export/lưu phẳng.
 - **Quan hệ với Library:** Tray chỉ là *recent*; Library là kho đầy đủ. Bỏ/clear một item khỏi Tray **không** xóa nó — vẫn khôi phục được trong Library.
 - **Ưu tiên:** P0 cho hiển thị + click load; P1 cho pin/reorder.
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Tray là `QListView` ngang (`setFlow(LeftToRight)`, `setWrapping(false)`) với một **`QAbstractListModel`** đọc từ `ezsnag_library` (query N item mới nhất theo `created_at`, cùng các item `pinned=1`).
   - Thumbnail dạng `QPixmap` cache (thumbnail cache trên đĩa + LRU in-memory) để cuộn mượt; render decouple khỏi load ảnh gốc.
   - Drag–drop dùng `QListView` internal move; thứ tự lưu vào cột `tray_order` (xem schema). Pin = cột `pinned` + sort key đặt các pinned trước.
@@ -60,7 +60,7 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
 - **Ưu tiên:**
   - **⭐MVP (P5):** search theo **tên / ngày / type** (filename + File Type/Date filter + sort) — đủ cho daily loop.
   - **fast-follow (P-sau):** filter đầy đủ **Applications/Websites/Tags/Flags/Favorites** — KHÔNG gate MVP (theo REVIEW §1.2: URL/app/tag filtering là fast-follow, không phải MVP-blocking).
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - View = grid thumbnail (`QListView` IconMode) + sidebar filter (cây category). Backing model là proxy trên dữ liệu SQLite.
   - Filter categories **auto-generated**: thực thi `SELECT DISTINCT`/`GROUP BY` trên các cột metadata (`source_app`, `source_url`, `file_type`, `created_at`) và bảng `tags`/`flags`. Date group bằng query nhóm theo `strftime` năm/tháng/ngày.
   - Search live: debounce input → `WHERE filename LIKE ?`; kết hợp với filter đang chọn bằng `AND`.
@@ -72,7 +72,7 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
   - **Tags:** chọn 1+ capture (Ctrl/Cmd+click nhiều) → nút **Tag** → gõ tag mới hoặc chọn tag có sẵn. Xem mọi tag qua category **Tags** trong filter. Tag dùng để gom/tìm lại capture.
   - **Flags:** visual marker gắn vào capture để nổi bật trong Tray/Library. Flag lọc/tìm được như tag nhưng là **tập marker cố định** (không phải free text).
 - **Ưu tiên:** P1.
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Tags là quan hệ nhiều–nhiều: bảng `tags(id, name)` + `capture_tags(capture_id, tag_id)`. Free text → upsert tag theo `name` (unique, case-insensitive).
   - Flags là tập enum cố định (vd: Red/Yellow/Green/Important…); lưu bitmask `flags INTEGER` trên `captures` hoặc bảng `capture_flags` nếu cho nhiều flag. Chọn bitmask cho gọn vì tập cố định.
   - Gán hàng loạt (multi-select) → một transaction.
@@ -86,7 +86,7 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
   - **Metadata:** right-click (Win) / Ctrl+click (Mac) xem metadata (ngày, source app/website).
   - **Combine / templates:** right-click → **Combine in Template** (nhiều), **Apply Template** (một), hoặc **Create Video from Images** (xem SPEC 08).
 - **Ưu tiên:** P0 (open/select/delete); P1 (metadata view, context-menu vào Templates).
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Delete = xóa bản ghi SQLite + file `.ezsnagx`/`.mp4` trong store (có thể đẩy vào thư mục Trash nội bộ để undo). Confirm prompt theo setting.
   - Context menu là `QMenu`; entry Templates ủy quyền sang `ezsnag_templates`.
 
@@ -98,30 +98,30 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
   - Bản export (PNG/JPG…) đi tới thư mục đích người dùng chọn lúc export/share (không nằm trong store).
   - Lưu store lên cloud sync folder (OneDrive/Drive/Dropbox) cho backup + đa thiết bị — nhưng *Library gốc là local*.
 - **Ưu tiên:** P0 cho store mặc định; P2 cho di chuyển location.
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Mặc định store ở `QStandardPaths::AppDataLocation`/`<app>/Library/` chứa DB `library.db` (SQLite) + thư mục `store/` chứa các file `.ezsnagx`/`.mp4` (đặt tên theo UUID).
   - Di chuyển location = move file + cập nhật đường dẫn base (DB chỉ lưu **đường dẫn tương đối** trong store để move không vỡ tham chiếu).
 
 ### 06.7 Backup/Restore & độ tin cậy Library
 
-- **Mô tả:** Library là tài sản người dùng tích lũy lâu dài — mất Library là **mất niềm tin không thể vãn hồi**. (Snagit từng **mất sạch Library sau khi update app** — research 06 §2.4.) Ezsnagit phải đảm bảo:
+- **Mô tả:** Library là tài sản người dùng tích lũy lâu dài — mất Library là **mất niềm tin không thể vãn hồi**. (Một rủi ro thực tế từng gặp ở công cụ tương tự: **mất sạch Library sau khi update app** — research 06 §2.4.) Ezsnagit phải đảm bảo:
   - **Auto-backup định kỳ:** tự sao lưu DB + store **mỗi N lần ghi** (cấu hình được), giữ vài bản gần nhất theo vòng (rotate).
   - **Export/Import toàn kho:** **1 nút** export toàn bộ Library (DB + file `.ezsnagx`/`.mp4`) thành một gói duy nhất, và import lại trên máy khác hoặc sau khi cài lại.
   - **Sống sót qua update app:** store + DB nằm **ngoài** thư mục cài đặt; update binary KHÔNG được đụng tới Library. Schema migration phải an toàn (backup trước khi migrate, có đường rollback).
   - **An toàn khi store nằm trong cloud-sync** (OneDrive/Dropbox/Drive): ghi atomic + tránh giữ lock dài để sync không gây hỏng/đụng độ file.
 - **Ưu tiên:** **⭐MVP (P5)** — đây là yêu cầu trust, không phải "để sau".
 - **Cross-ref:** SPEC 12 §12.3 (Độ tin cậy Library — trust dealbreaker).
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Backup = snapshot atomic DB (SQLite `VACUUM INTO` hoặc backup API) + copy/hardlink các file store tham chiếu; gói export là một archive (vd `.zip`/thư mục có manifest version).
   - Đếm số lần ghi qua counter persistent; trigger backup khi đạt ngưỡng N, chạy trên thread nền.
   - Migration: kiểm tra `schema_version`, backup tự động trước khi nâng cấp schema.
 
 ### 06.8 Crash-recovery (phục hồi sau crash)
 
-- **Mô tả:** capture **chưa kịp lưu** (đang edit, hoặc video đang finalize) phải **phục hồi được sau crash**. (Snagit mất capture khi crash lúc finalize video — research 08 §9.) Khi khởi động lại, app dò journal/temp và đề nghị khôi phục document dở dang.
+- **Mô tả:** capture **chưa kịp lưu** (đang edit, hoặc video đang finalize) phải **phục hồi được sau crash**. (Rủi ro thực tế: mất capture khi crash lúc finalize video — research 08 §9.) Khi khởi động lại, app dò journal/temp và đề nghị khôi phục document dở dang.
 - **Ưu tiên:** **⭐MVP (P5)**.
 - **Cross-ref:** SPEC 12 §12.4 (Crash-safety & phục hồi).
-- **Ghi chú clone C++/Qt:** ghi tạm ngay khi tạo document (§06.1 atomic write); video stream thẳng xuống đĩa khi quay; lưu marker "đang mở/đang ghi" để phát hiện document chưa đóng sạch ở lần khởi động kế.
+- **Ghi chú implement C++/Qt:** ghi tạm ngay khi tạo document (§06.1 atomic write); video stream thẳng xuống đĩa khi quay; lưu marker "đang mở/đang ghi" để phát hiện document chưa đóng sạch ở lần khởi động kế.
 
 ---
 
@@ -145,8 +145,8 @@ Ngoài phạm vi (ở spec khác): định dạng `.ezsnagx` chi tiết → SPEC
 
 ## Điểm chưa chắc
 
-- **Default Tray count** so với max 200 có thể khác theo version Snagit; ta chọn mặc định hợp lý (vd 25) trong khoảng 1–200.
-- **Favorites** là Mac-only ở Snagit; với clone có thể nâng thành flag chung "Favorite" thay vì giữ phân biệt nền tảng — cần quyết định.
+- **Default Tray count** so với max 200 có thể khác nhau; ta chọn mặc định hợp lý (vd 25) trong khoảng 1–200.
+- **Favorites** vốn là khái niệm Mac-only; ở Ezsnagit có thể nâng thành flag chung "Favorite" thay vì giữ phân biệt nền tảng — cần quyết định.
 - **Flags** lưu bitmask (tập cố định) vs bảng riêng (cho phép custom flag tương lai) — chọn bitmask trước, để ngỏ migration.
 - Metadata **source_app / source_url** phụ thuộc engine capture có lấy được context cửa sổ/URL không (liên quan `ezsnag_capture`); có thể null trong bản đầu.
 - **Backup/restore** (§06.7) đã đưa vào MVP (P5), không còn ngoài scope. Còn để ngỏ: ngưỡng N lần ghi mặc định cho auto-backup, số bản backup giữ lại (rotate), và định dạng gói export (zip vs thư mục có manifest) — chọn giá trị hợp lý, tinh chỉnh theo thực tế.

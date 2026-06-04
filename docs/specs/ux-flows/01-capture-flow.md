@@ -1,7 +1,6 @@
 # UX Flows — Capture (Ezsnagit)
 
-> Tham chiếu: docs/specs/01-capture.md · Nguồn: docs/research/01-capture.md
-> Phím tắt ghi theo Windows; Mac trong ngoặc khi khác. Mỗi flow liệt kê từng bước 1→2→3 kèm thay đổi trạng thái UI.
+> Tham chiếu: docs/specs/01-capture.md> Phím tắt ghi theo Windows; Mac trong ngoặc khi khác. Mỗi flow liệt kê từng bước 1→2→3 kèm thay đổi trạng thái UI.
 
 ---
 
@@ -157,7 +156,7 @@
 
 1. Mở Capture Window → click **Shortcut** field. → *field chờ nhận tổ hợp.*
 2. Bấm tổ hợp phím mong muốn. → *hotkey mới ghi nhận.*
-3. (Windows 11, nếu chọn Print Screen) nếu Print Screen mở Snipping Tool → vào **Windows Settings → Accessibility → Keyboard** tắt **"Use the Print screen key to open screen capture"** → restart. → *Print Screen nhường cho Ezsnagit.*
+3. (Windows 11, nếu chọn Print Screen) nếu Print Screen mở tiện ích chụp màn hình mặc định của Windows → vào **Windows Settings → Accessibility → Keyboard** tắt **"Use the Print screen key to open screen capture"** → restart. → *Print Screen nhường cho Ezsnagit.*
 - Preset hotkey đặt riêng trong cấu hình từng preset.
 
 ---

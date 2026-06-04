@@ -14,7 +14,7 @@ MVP = **2 workflow chủ lực chạy thật nhanh**, kèm nền NFR:
 - **MVP-A — Bug-report loop** (luồng tần suất cao nhất): chụp region/window/fullscreen + **global hotkey (đổi được)** +
   **Repeat Last Capture** + Arrow/Text/Callout/Box/Highlight có **Quick Styles** + Blur/redact + Crop +
   **preset copy-thẳng-clipboard-không-mở-editor** + lưu PNG + Recent tray + tìm theo tên/ngày + **Capture Info overlay**.
-  → Tiêu chí: hoàn tất **< 5 giây** (research 09 §6).
+  → Tiêu chí: hoàn tất **< 5 giây**.
 - **MVP-B — Doc-steps loop**: + **Step tool** (thủ công) + bộ **Combine-in-Template** nhỏ (cạnh nhau / đánh số / before-after) + export PDF/ảnh.
 
 Nền bắt buộc kèm MVP: **NFR** (SPEC 12) — DPI/đa màn hình đúng, footprint gọn, offline-first, Library atomic + backup.
@@ -33,7 +33,7 @@ Nền bắt buộc kèm MVP: **NFR** (SPEC 12) — DPI/đa màn hình đúng, fo
 - **Global hotkey đổi được** + **Repeat Last Capture** (default `Ctrl+Shift+R`).
 - **Screen-freeze** trước khi chọn vùng + magnifier/crosshair + self-timer (UX win rẻ, research 07).
 - **Preset copy-thẳng-clipboard** (không mở editor) — enabler của bug-report loop.
-- `ezsnag_capture` (lớp platform Windows). Tham khảo **Flameshot** cho overlay (study, không copy — GPL).
+- `ezsnag_capture` (lớp platform Windows).
 
 ### P2 — Editor canvas + document model 🟥 ⭐MVP
 - Canvas + `ezsnag_canvas` object graph vector (QGraphicsScene), z-order, undo/redo.
@@ -59,11 +59,11 @@ Nền bắt buộc kèm MVP: **NFR** (SPEC 12) — DPI/đa màn hình đúng, fo
 
 ### P6 — Share / Outputs 🟥
 - File (PNG/JPG/PDF/GIF), Clipboard, **Email (chốt cơ chế MAPI/COM)**, mở bằng app ngoài.
-- **Upload layer dạng interface pluggable** ngay từ đầu (để sau cắm custom HTTP/FTP kiểu ShareX).
+- **Upload layer dạng interface pluggable** ngay từ đầu (để sau cắm custom HTTP/FTP).
 
 ### P7 — After-capture chain + Pinned screenshots 🟥 (differentiator)
-- Chuỗi xử-lý-sau-chụp gọn (effects→editor→save→copy-link) kiểu ShareX.
-- Pinned/floating screenshots (CleanShot-grade UX).
+- Chuỗi xử-lý-sau-chụp gọn (effects→editor→save→copy-link).
+- Pinned/floating screenshots.
 
 ### P8 — Scrolling capture 🟥 (rủi ro cao — spike trước)
 - **Panoramic/manual stitch trước** (xác định), auto-scroll sau. "Stitch xấu còn tệ hơn không có."
@@ -76,9 +76,9 @@ Nền bắt buộc kèm MVP: **NFR** (SPEC 12) — DPI/đa màn hình đúng, fo
 
 ### P11 — Templates đầy đủ + Video 🟥
 - Create from Template đầy đủ, Combine, Create Video from Images.
-- **Video** (quay + trim/cut + GIF) qua FFmpeg — giữ NHẸ (không multitrack = Camtasia). Rủi ro: system-audio loopback.
+- **Video** (quay + trim/cut + GIF) qua FFmpeg — giữ NHẸ (không multitrack = trình biên tập video chuyên dụng). Rủi ro: system-audio loopback.
 
-### P12 — Simplify / Smart Move 🟥 (research-grade risk — gate sau spike)
+### P12 — Simplify / Smart Move 🟥
 - `ezsnag_simplify` (OpenCV). **Smart Move + inpaint = rủi ro cao nhất** → gate sau feasibility spike; cân nhắc **cắt khỏi v1** hoặc chỉ manual-simplify. Edit-Text-in-place có thể bỏ v1.
 
 ### P13 — Polish 🟥
@@ -94,4 +94,4 @@ Nền bắt buộc kèm MVP: **NFR** (SPEC 12) — DPI/đa màn hình đúng, fo
 5. Giữ base install gọn bằng component pack tải-khi-cần (bảo vệ NFR footprint).
 
 ## Định vị (lead bằng cái này, không phải feature)
-**"Sở hữu vĩnh viễn · không subscription · chạy offline · nhẹ"** — đây là khẩu hiệu, vì lời chê to nhất của Snagit là bản quyền + nặng (research 08 §1/§9).
+**"Sở hữu vĩnh viễn · không subscription · chạy offline · nhẹ"** — đây là khẩu hiệu, vì lời chê to nhất của các công cụ thương mại cùng phân khúc là bản quyền + nặng.

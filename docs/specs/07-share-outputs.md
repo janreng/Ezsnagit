@@ -1,15 +1,15 @@
 # SPEC 07 — Share / Outputs (Ezsnagit)
 
-> Nguồn: docs/research/05-library-share-templates.md · Module: `ezsnag_share`
+> Module: `ezsnag_share`
 
 ## Mục tiêu & phạm vi
 
 Share/Outputs là lớp đưa capture **ra ngoài** Ezsnagit: copy clipboard, lưu file, gửi email, mở bằng program ngoài, và (gác lại) các đích cloud. Mỗi đích là một **destination** có cấu hình riêng, hiển thị trong **Share dropdown** ở Editor, thứ tự và việc bật/tắt do người dùng quản lý trong Preferences > Share.
 
-**Ranh giới clone (quan trọng):**
+**Ranh giới phạm vi (quan trọng):**
 - **⭐MVP (P6):** File (PNG/JPG/PDF), Clipboard, Email (MAPI), Open-with / Program (custom external app), và **interface `IShareDestination` pluggable** (xem 07.2a).
 - **Differentiator (P7):** after-capture task chain (xem 07.5).
-- **Gác lại (P-sau):** mọi đích cloud bản quyền cần OAuth (Screencast, Google Drive, Dropbox, Box, OneDrive/SharePoint, Slack, Teams, YouTube, Camtasia Online…). Khung plugin định nghĩa sớm nhưng OAuth/auth triển khai sau; **Share Link hosted là hạng mục cloud ưu tiên #1**.
+- **Gác lại (P-sau):** mọi đích cloud cần OAuth (cloud host, Google Drive, Dropbox, Box, OneDrive/SharePoint, Slack, Teams, YouTube…). Khung plugin định nghĩa sớm nhưng OAuth/auth triển khai sau; **Share Link hosted là hạng mục cloud ưu tiên #1**.
 
 Trước khi share, mọi đích raster sẽ **flatten** document `.ezsnagx` xuống ảnh phẳng theo định dạng đích (chi tiết flatten ở SPEC 09).
 
@@ -21,17 +21,17 @@ Trước khi share, mọi đích raster sẽ **flatten** document `.ezsnagx` xu�
 
 - **Mô tả:**
   1. **Copy / Copy All** → clipboard, paste bằng Ctrl+V (Win) / Cmd+V (Mac).
-  2. **Share Link** → upload lên cloud host (mặc định Screencast của Snagit) và copy URL chia sẻ.
+  2. **Share Link** → upload lên cloud host (hosted share mặc định) và copy URL chia sẻ.
   3. **Share to destination** → chọn từ Share dropdown.
 - **Ưu tiên:** Copy = ⭐MVP (P6); Share to destination = ⭐MVP (P6) (cho các đích local); Share Link = P-sau (cần cloud).
-- **Ghi chú ưu tiên Share Link:** một luồng **"copy link" hosted share chạy ngon, robust** là **flow chia sẻ hiện đại được yêu cầu nhiều nhất** (research 09 §6 #8 — "covers the dominant modern flow"). Vì thế khi tới giai đoạn cloud (**P-sau**), Share Link là **hạng mục cloud ưu tiên số 1** — làm trước các đích Office/Comm OAuth khác. Có thể cân nhắc một bản link tối giản (self-host/local-server) sớm hơn nếu khả thi.
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú ưu tiên Share Link:** một luồng **"copy link" hosted share chạy ngon, robust** là **flow chia sẻ hiện đại được yêu cầu nhiều nhất**. Vì thế khi tới giai đoạn cloud (**P-sau**), Share Link là **hạng mục cloud ưu tiên số 1** — làm trước các đích Office/Comm OAuth khác. Có thể cân nhắc một bản link tối giản (self-host/local-server) sớm hơn nếu khả thi.
+- **Ghi chú implement C++/Qt:**
   - Copy: flatten → `QImage` → `QClipboard::setImage` (giữ alpha nếu định dạng hỗ trợ). "Copy All" áp cho nhiều capture chọn.
   - Share Link để khung interface nhưng disable trong bản đầu (cloud gác lại).
 
 ### 07.2 Danh sách Share destinations (outputs)
 
-> Thứ tự/danh sách tùy nền tảng và đích nào được bật trong Preferences. Dưới là hợp nhất các đích Snagit tài liệu hóa, kèm trạng thái clone.
+> Thứ tự/danh sách tùy nền tảng và đích nào được bật trong Preferences. Dưới là tập các đích Ezsnagit hỗ trợ, kèm trạng thái triển khai.
 
 **Local & other (LÀM TRƯỚC)**
 - **File** — lưu ra đĩa theo định dạng chọn (PNG/JPG/PDF/.ezsnagx… xem SPEC 09). → ⭐MVP (P6)
@@ -43,7 +43,7 @@ Trước khi share, mọi đích raster sẽ **flatten** document `.ezsnagx` xu�
 - **FTP / SFTP** — upload file qua FTP/SFTP, là uploader cắm vào `IShareDestination` (xem 07.2a). → fast-follow (sau P6)
 
 **Cloud & collaboration (GÁC LẠI — cần OAuth)**
-- Screencast (đích Share Link mặc định), Google Drive, Dropbox, Box, Microsoft OneDrive (Win), Microsoft SharePoint (Win). → P3+
+- Hosted share (đích Share Link mặc định), Google Drive, Dropbox, Box, Microsoft OneDrive (Win), Microsoft SharePoint (Win). → P3+
 
 **Microsoft Office (GÁC LẠI / tùy chọn)**
 - Word, PowerPoint, Excel, OneNote (Win), Outlook (Mac). → P3
@@ -51,18 +51,18 @@ Trước khi share, mọi đích raster sẽ **flatten** document `.ezsnagx` xu�
 **Communication (GÁC LẠI — cần OAuth/app)**
 - Slack, Microsoft Teams, X/Twitter (Win). → P3+
 
-**Video / TechSmith ecosystem (NGOÀI PHẠM VI)**
-- YouTube, Camtasia Online, Camtasia Editor. → out of scope (đó là pipeline Camtasia).
+**Video host (NGOÀI PHẠM VI)**
+- YouTube và các editor video chuyên dụng. → out of scope (pipeline video nặng).
 
 **Apple-specific / Mac (TÙY CHỌN)**
 - Pages, Keynote, Numbers; macOS share sheet: AirDrop, Mail, Messages, Notes, Photos, Freeform, Journal, Reminders. → P3 (qua native share sheet nếu build Mac).
 
-- **Ghi chú clone C++/Qt:** Mỗi destination implement chung interface `IShareDestination` (`name`, `icon`, `isAvailable()`, `configure()`, `share(captureRef, options)`). Đích cloud là plugin nạp sau; đích local là built-in. Khác biệt Win/Mac (Email/Clipboard/Printer/X là Win-only; Outlook/Pages/share-sheet là Mac-only) thể hiện bằng `isAvailable()` theo `#ifdef Q_OS_*`.
+- **Ghi chú implement C++/Qt:** Mỗi destination implement chung interface `IShareDestination` (`name`, `icon`, `isAvailable()`, `configure()`, `share(captureRef, options)`). Đích cloud là plugin nạp sau; đích local là built-in. Khác biệt Win/Mac (Email/Clipboard/Printer/X là Win-only; Outlook/Pages/share-sheet là Mac-only) thể hiện bằng `isAvailable()` theo `#ifdef Q_OS_*`.
 
 #### 07.2a Lớp share/upload pluggable (`IShareDestination`) — thiết kế từ ngày đầu
 
 - **Quyết định thiết kế:** lớp share/upload là một **interface `IShareDestination` pluggable ngay từ ngày đầu**, KHÔNG hard-code danh sách đích. Mọi destination (local built-in lẫn cloud/upload nạp sau) đều đi qua cùng một interface, được đăng ký vào một registry và render động ra Share dropdown.
-- **Lý do:** đây là **ShareX power-feature** — sự linh hoạt về upload-destination là khoảng trống cạnh tranh lớn nhất của Snagit (research 07: "limited upload-destination flexibility, no real plugin/extension ecosystem"). Thiết kế interface sớm cho phép sau này cắm thêm **custom HTTP uploader** (URL + headers + parse response regex để lấy link) và **FTP/SFTP** mà không phải sửa core.
+- **Lý do:** sự linh hoạt về upload-destination là một khoảng trống cạnh tranh lớn trên thị trường. Thiết kế interface sớm cho phép sau này cắm thêm **custom HTTP uploader** (URL + headers + parse response regex để lấy link) và **FTP/SFTP** mà không phải sửa core.
 - **Ưu tiên:**
   - **Interface `IShareDestination` + registry + render dropdown động → P6** (làm cùng các đích local MVP).
   - **Custom HTTP uploader + FTP/SFTP → fast-follow** (sau P6, trước khi đụng cloud OAuth nặng). Đây là các uploader cắm thêm, không block MVP.
@@ -72,10 +72,10 @@ Trước khi share, mọi đích raster sẽ **flatten** document `.ezsnagx` xu�
 
 - **Mô tả:**
   - **Windows:** Editor → Edit > Editor Preferences > **Share** tab → tick/untick để bật/tắt; reorder để đổi thứ tự trong Share dropdown.
-  - **Mac:** Snagit menu > Settings > **Share** tab → **+** thêm đích từ list, **−** gỡ; reorder tùy ý.
+  - **Mac:** menu ứng dụng > Settings > **Share** tab → **+** thêm đích từ list, **−** gỡ; reorder tùy ý.
   - Per-destination preferences: đặt **account**, **privacy level**, **default folder**, **name** tùy chỉnh (Mac), **keyboard shortcut** (Mac).
 - **Ưu tiên:** P1 (UI bật/tắt + reorder); per-destination prefs theo từng đích.
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Cấu hình lưu trong `QSettings` (hoặc bảng config trong SQLite của library): danh sách destination enabled + thứ tự + tham số mỗi đích.
   - Share dropdown render từ danh sách enabled theo thứ tự đã lưu; reorder = drag trong list settings.
   - Per-destination prefs là dialog do chính destination cung cấp (`configure()` mở widget riêng).
@@ -87,7 +87,7 @@ Trước khi share, mọi đích raster sẽ **flatten** document `.ezsnagx` xu�
   - **Mac:** Share dropdown → **Preferences > Add Share > Application** → chọn startup file của app.
   - Cho phép tải thêm destination plugin; enterprise có thể pre-config qua deployment.
 - **Ưu tiên:** P1.
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - "Program" destination = flatten/export ra file tạm (định dạng cấu hình, mặc định PNG) → `QProcess::startDetached(exePath, {tempFile})`.
   - Quản lý danh sách program (path + tên + định dạng truyền) trong settings; mỗi program là một entry destination động.
   - Mac: tương tự, mở bằng app chỉ định (`open -a App tempFile`).
@@ -95,11 +95,11 @@ Trước khi share, mọi đích raster sẽ **flatten** document `.ezsnagx` xu�
 ### 07.5 After-capture task chain (post-capture pipeline) — differentiator
 
 - **Mô tả:**
-  - Một **pipeline sau-chụp gọn nhẹ kiểu ShareX**: sau khi chụp, capture chạy qua một **chuỗi bước do người dùng cấu hình** thay vì một flow cố định. Chuỗi mặc định gọn: **effects → save → copy-link** (ví dụ: áp effect/border → lưu file PNG → copy đường dẫn/URL vào clipboard).
+  - Một **chuỗi xử lý sau chụp gọn nhẹ**: sau khi chụp, capture chạy qua một **chuỗi bước do người dùng cấu hình** thay vì một flow cố định. Chuỗi mặc định gọn: **effects → save → copy-link** (ví dụ: áp effect/border → lưu file PNG → copy đường dẫn/URL vào clipboard). Đích xuất ở từng bước theo dạng plugin (`IShareDestination`).
   - Người dùng tự **bật/tắt và sắp xếp thứ tự** từng bước trong chuỗi (giống reorder destination ở 07.3). Mỗi bước là một hành động nhỏ, composable: áp effect, mở editor, lưu file, copy ra clipboard, gửi tới một `IShareDestination`, copy link sau khi share.
-  - Đây là **half thứ hai của định vị "CleanShot UX + ShareX automation"** (research 07 §10): Snagit không có chuỗi automation tương đương. Giữ **nhẹ** — không phải workflow engine đầy đủ của ShareX, chỉ một chuỗi tuyến tính các bước có sẵn.
+  - Đây là **half thứ hai của định vị "polished capture UX + automation"**: nhiều công cụ chụp màn hình thiếu chuỗi automation tương đương. Giữ **nhẹ** — không phải một workflow engine đầy đủ, chỉ một chuỗi tuyến tính các bước có sẵn.
 - **Ưu tiên:** **P7 (differentiator)** — xem ROADMAP P7 ("After-capture chain + Pinned screenshots"). Không thuộc MVP P6; là fast-follow tạo khác biệt.
-- **Ghi chú clone C++/Qt:**
+- **Ghi chú implement C++/Qt:**
   - Chuỗi lưu dưới dạng danh sách step (kiểu + tham số) trong settings; runner duyệt tuần tự, mỗi step nhận/đẩy `captureRef`.
   - Tái dùng đúng các khối đã có: effect engine (SPEC 03), File destination, Clipboard, và `IShareDestination` (07.2a) cho bước upload/share. Step "copy-link" lấy URL trả về từ `share()`.
   - Cross-reference: ROADMAP **P7**; lớp upload pluggable ở **07.2a**.
@@ -127,7 +127,7 @@ Trước khi share, mọi đích raster sẽ **flatten** document `.ezsnagx` xu�
 ## Điểm chưa chắc
 
 - **Share dropdown** mặc định bật những đích nào (subset) chưa cố định — admin/enterprise có thể đổi; ta đề xuất mặc định: File, Clipboard, Email, Program.
-- Per-destination **keyboard shortcut** là Mac-only ở Snagit; có thể nâng thành cross-platform trong clone — để ngỏ.
+- Per-destination **keyboard shortcut** vốn là khái niệm Mac-only; có thể nâng thành cross-platform trong Ezsnagit — để ngỏ.
 - Định dạng file mặc định khi "Program" bàn giao (PNG vs giữ `.ezsnagx`) tùy app đích — cho cấu hình per-program.
 
 **Đã chốt (không còn để ngỏ):**

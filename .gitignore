@@ -12,3 +12,5 @@ installer/*.exe
 dist/
 .env
 *.env
+docs/research/
+docs/REVIEW.md

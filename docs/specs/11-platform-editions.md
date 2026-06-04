@@ -1,44 +1,41 @@
-# SPEC 11 — Platform & Phạm vi clone (Ezsnagit)
+# SPEC 11 — Nền tảng & Phạm vi (Ezsnagit)
 
-> Nguồn: docs/research/05-library-share-templates.md (§6), tổng hợp Win/Mac diff các spec · Module: —
+> Module: —
 
 ## Mục tiêu
 
-Chốt **nền tảng mục tiêu** và **ranh giới clone** để khỏi sa lầy vào tính năng phụ thuộc bản quyền/nền tảng.
+Chốt **nền tảng mục tiêu** và **ranh giới phạm vi** để khỏi sa lầy vào tính năng phụ thuộc bản quyền/nền tảng.
 
 ## 11.1 Nền tảng mục tiêu
 
 - **Windows trước** (giống Ezcel — toolchain Qt6/MinGW ở `C:\Qt`). Lý do: capture/hotkey/loopback-audio API trên Windows rõ ràng, và máy phát triển là Windows 10.
-- macOS: gác lại. Snagit có khác biệt Win/Mac đáng kể (xem dưới); clone không cố parity 2 nền tảng giai đoạn đầu.
+- macOS: gác lại. Ezsnagit không cố parity 2 nền tảng giai đoạn đầu — tập trung làm tốt một nền tảng (Windows) trước.
 
-## 11.2 Khác biệt Snagit Windows vs Mac (tham khảo khi clone)
+## 11.2 Phạm vi tính năng (in-scope)
 
-| Khu vực | Chỉ Windows | Chỉ Mac |
-|---|---|---|
-| Capture | Multiple Area, Time-lapse/Interval, Freehand, Printer capture | Webcam still-image, Mission Control capture |
-| Effects | Page Curl, Color Replacement, Watermark, Spotlight & Magnify (effect), Lock Objects (Simplify) | Reflection, Fade, "Add Horizontal/Vertical Space" (Cut Out đảo) |
-| Tools | Spotlight = Selection + effect | Spotlight = tool riêng |
-| Video | (Remove audio: workaround) | Mirror camera, virtual background, "Make a Silent Copy", GIF Dynamic Colors |
-| Share | Email, Clipboard, Program, Printer, OneDrive | Outlook, Pages/Keynote, macOS share-sheet |
+Ezsnagit nhắm một **superset hữu ích** các tính năng capture/annotate trên Windows, theo roadmap P0–P13:
 
-→ **Chiến lược clone:** Ezsnagit gộp **superset hữu ích** trên một nền tảng (Windows), bỏ các mục trùng lặp/ít giá trị.
+- Capture ảnh (region/window/fullscreen/scrolling).
+- Editor annotation đầy đủ, effects + transforms.
+- Library + auto-save.
+- Share file/clipboard/email.
+- Grab Text OCR.
+- Video trim/cut + GIF.
+- Templates cơ bản.
 
-## 11.3 Phạm vi clone (in-scope vs gác lại)
+## 11.3 Ngoài phạm vi / gác lại
 
-**Làm (theo roadmap P0–P13):**
-- Capture ảnh (region/window/fullscreen/scrolling), editor annotation đầy đủ, effects + transforms, library + auto-save, share file/clipboard/email, Grab Text OCR, video trim/cut + GIF, templates cơ bản.
+- Tích hợp cloud có bản quyền & OAuth (các dịch vụ chia sẻ/đám mây bên thứ ba): gác lại.
+- Smart Move / Simplify mức "AI" cao — chỉ làm bản OpenCV cơ bản.
+- Video multitrack, hiệu ứng chuyển cảnh, narration nâng cao (thuộc phạm trù dựng video chuyên dụng, không phải chụp & annotate).
+- Đồng bộ tài khoản online, marketplace asset.
 
-**Gác lại / ngoài phạm vi:**
-- Tích hợp cloud có bản quyền & OAuth: Screencast.com, Slack, Teams, Google Drive/Dropbox/OneDrive, YouTube.
-- Smart Move / Simplify mức "AI" cao (chỉ làm bản OpenCV cơ bản).
-- Video multitrack, hiệu ứng chuyển cảnh, narration nâng cao (đó là **Camtasia**, không phải Snagit).
-- Đồng bộ tài khoản TechSmith, Assets marketplace.
+## 11.4 Lựa chọn kỹ thuật cốt lõi
 
-## 11.4 Khác biệt có chủ đích với Snagit
-
-- Format gốc: **`.ezsnagx`** (không phải `.snagx`).
-- OCR: **Tesseract** (không phải ABBYY).
+- Format gốc: **`.ezsnagx`**.
+- OCR: **Tesseract**.
 - Video/GIF: **FFmpeg**.
+- Xử lý ảnh (Simplify/inpaint cơ bản): **OpenCV**.
 - Library DB: **SQLite**.
 - Tên & thương hiệu: **Ezsnagit** (đồng bộ họ "Ez*" với Ezcel).
 
@@ -47,5 +44,5 @@ Chốt **nền tảng mục tiêu** và **ranh giới clone** để khỏi sa l�
 - Windows 10/11 64-bit. Qt6.8+, MinGW. Phụ thuộc runtime: Tesseract, OpenCV, FFmpeg (đóng gói kèm hoặc tải khi cài).
 
 ## Điểm chưa chắc
-- Số phiên bản "mới nhất" của Snagit dùng đánh số theo năm (2025/2026) — không có 1 con số cố định; tính năng tham chiếu theo dòng 2025–2026.
-- Một số tính năng version-gated (Smart Move, Simplify palette, plain-vs-formatted OCR) xuất hiện ở bản mới; clone không cần bám đúng mốc version.
+- Một số tính năng nâng cao (Smart Move, Simplify palette, plain-vs-formatted OCR) cần spike kỹ thuật trước khi chốt phạm vi chính xác.
+- Target đóng gói component pack (tải khi cần vs bundle) sẽ điều chỉnh theo dung lượng thực tế khi build.

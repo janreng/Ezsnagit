@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(Ezsnagit VERSION 0.1.0 LANGUAGES CXX)
 
-# Ezsnagit — clone TechSmith Snagit bằng C++/Qt6 (Windows-first, MinGW).
+# Ezsnagit — phần mềm chụp & chú thích màn hình, C++/Qt6 (Windows-first, MinGW).
 # Kiến trúc: static lib per module (xem docs/specs/00-overview-architecture.md).
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

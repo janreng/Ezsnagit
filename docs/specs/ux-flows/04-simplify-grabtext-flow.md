@@ -1,6 +1,6 @@
 # UX FLOW 04 — Simplify, Smart Move & Grab Text (Ezsnagit)
 
-> Nguồn: docs/research/03-effects-ocr.md · Spec: docs/specs/04-simplify-grabtext.md · Module: `ezsnag_simplify` (OpenCV) + `ezsnag_ocr` (Tesseract)
+> Spec: docs/specs/04-simplify-grabtext.md · Module: `ezsnag_simplify` (OpenCV) + `ezsnag_ocr` (Tesseract)
 
 Các luồng thao tác từng-bước cho Simplify, Smart Move và OCR. Tiền đề: đã có capture mở trong Editor.
 

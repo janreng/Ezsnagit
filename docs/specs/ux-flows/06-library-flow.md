@@ -1,6 +1,6 @@
 # UX FLOW 06 — Library (Ezsnagit)
 
-> Nguồn: docs/research/05-library-share-templates.md · Spec: 06-library.md · Module: `ezsnag_library`
+> Spec: 06-library.md · Module: `ezsnag_library`
 
 Luồng từng bước cho Library: từ lúc capture được auto-save, qua Recent Captures Tray, tới Library View (tìm/lọc/sort), và tag/flag/quản lý.
 

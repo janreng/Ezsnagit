@@ -22,7 +22,7 @@
 11. Bấm **Stop** (hoặc `Shift+F10`).
 12. Video mở trong **Editor** trên canvas, sẵn sàng trim/edit/share.
 
-*Clone notes:* writer FFmpeg chỉ start sau khi countdown xong (frame countdown không vào file); mic qua QAudioSource/dshow trộn AAC vào MP4; toolbar là cửa sổ frameless always-on-top tách khỏi vùng quay.
+*Ghi chú implement:* writer FFmpeg chỉ start sau khi countdown xong (frame countdown không vào file); mic qua QAudioSource/dshow trộn AAC vào MP4; toolbar là cửa sổ frameless always-on-top tách khỏi vùng quay.
 
 ---
 
@@ -38,7 +38,7 @@
 6. Lặp lại cho đầu/cuối còn lại nếu cần. `Ctrl+Z` để undo nếu cắt nhầm.
 7. Xuất qua Flow F (export MP4) khi xong.
 
-*Clone notes:* cắt là **không phá hủy** — cập nhật danh sách "kept segments", preview phát theo edit list, chỉ render thật khi export.
+*Ghi chú implement:* cắt là **không phá hủy** — cập nhật danh sách "kept segments", preview phát theo edit list, chỉ render thật khi export.
 
 ---
 
@@ -53,7 +53,7 @@
 5. Bấm **Cut Out** → đoạn giữa biến mất, phần trước và sau **tự nối lại**; **đường vàng** đánh dấu mối nối.
 6. Kiểm tra mối nối bằng Play; `Ctrl+Z` nếu cần.
 
-*Clone notes:* khi export, FFmpeg cắt theo từng segment giữ lại rồi `concat`; re-encode quanh điểm cắt để cắt đúng frame (không lệ thuộc keyframe).
+*Ghi chú implement:* khi export, FFmpeg cắt theo từng segment giữ lại rồi `concat`; re-encode quanh điểm cắt để cắt đúng frame (không lệ thuộc keyframe).
 
 ---
 
@@ -74,7 +74,7 @@
 7. Xem **ước lượng dung lượng** (cảnh báo nếu >1MB); bấm **Create**.
 8. Chọn nơi lưu → GIF được xuất.
 
-*Clone notes:* pipeline FFmpeg `palettegen` → `paletteuse`; Reduced File Size = `scale=200:200:force_original_aspect_ratio=decrease`; looping qua `-loop`; nếu GIF mờ thì làm lại Custom + fps cao hơn.
+*Ghi chú implement:* pipeline FFmpeg `palettegen` → `paletteuse`; Reduced File Size = `scale=200:200:force_original_aspect_ratio=decrease`; looping qua `-loop`; nếu GIF mờ thì làm lại Custom + fps cao hơn.
 
 ---
 
@@ -88,7 +88,7 @@
 4. Bấm **Save Frame as Image** (icon máy ảnh).
 5. Frame mở thành **ảnh mới** trên canvas — annotate (arrow/shape/text), edit, share như screenshot thường.
 
-*Clone notes:* decode frame tại thời điểm playhead bằng FFmpeg (seek chính xác, không lấy frame downscale từ preview); tạo capture ảnh mới trong `ezsnag_canvas`. Hoạt động cả với video import MP4/MOV/GIF.
+*Ghi chú implement:* decode frame tại thời điểm playhead bằng FFmpeg (seek chính xác, không lấy frame downscale từ preview); tạo capture ảnh mới trong `ezsnag_canvas`. Hoạt động cả với video import MP4/MOV/GIF.
 
 ---
 
@@ -101,7 +101,7 @@
 3. Hệ thống render edit list (cắt + concat các đoạn giữ lại) và encode.
 4. File MP4 được lưu; (tùy chọn) copy đường dẫn vào clipboard.
 
-*Clone notes:* encode `libx264 -crf 20 -preset medium`, AAC audio, `yuv420p`, `+faststart`; fps theo capture thực; không phơi CRF cho user thường (ẩn trong Preferences nếu cần — SPEC 10).
+*Ghi chú implement:* encode `libx264 -crf 20 -preset medium`, AAC audio, `yuv420p`, `+faststart`; fps theo capture thực; không phơi CRF cho user thường (ẩn trong Preferences nếu cần — SPEC 10).
 
 ---
 
@@ -116,7 +116,7 @@
 5. Xác nhận → các clip ghép thành một video trên canvas.
 6. Trim/Cut Out tiếp nếu cần → export qua Flow F.
 
-*Clone notes:* FFmpeg `concat`; **normalize** trước (cùng resolution/fps/pixfmt/codec/sample rate), mismatch resolution thì pad letterbox theo clip lớn nhất.
+*Ghi chú implement:* FFmpeg `concat`; **normalize** trước (cùng resolution/fps/pixfmt/codec/sample rate), mismatch resolution thì pad letterbox theo clip lớn nhất.
 
 ---
 
@@ -136,7 +136,7 @@
 10. Bấm **Stop** (`Shift+F10`).
 11. Video mở trên canvas để trim/edit và export **MP4** (Flow F).
 
-*Clone notes:* thuộc SPEC 08 (`ezsnag_templates`), phần ghi do `ezsnag_video`; compositor render mỗi ảnh + overlay annotation thành frame, ghi cùng track mic; chuyển ảnh = đổi nguồn compositor (không transition).
+*Ghi chú implement:* thuộc SPEC 08 (`ezsnag_templates`), phần ghi do `ezsnag_video`; compositor render mỗi ảnh + overlay annotation thành frame, ghi cùng track mic; chuyển ảnh = đổi nguồn compositor (không transition).
 
 ---
 
@@ -147,4 +147,4 @@
 3. Quay như Flow A.
 4. **Trong khi quay**, bấm `Ctrl+Shift+F` (hoặc nút Fullscreen Webcam / PiP) để **chuyển qua lại**; kéo góc preview để resize, kéo preview giữa các góc để reposition.
 
-*Lưu ý:* PiP **chỉ chỉnh lúc quay** — sau khi quay không sửa được vị trí/kích thước webcam trong clone (đó là phạm vi Camtasia). Xem SPEC 05 §6.
+*Lưu ý:* PiP **chỉ chỉnh lúc quay** — sau khi quay không sửa được vị trí/kích thước webcam (đó là phạm vi của trình biên tập video chuyên dụng). Xem SPEC 05 §6.

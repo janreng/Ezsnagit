@@ -1,6 +1,6 @@
 # Ezsnagit — Index Spec
 
-Bộ tài liệu thiết kế để clone Snagit bằng C++/Qt6. Đọc `00` trước (kiến trúc & bản đồ module).
+Bộ tài liệu thiết kế Ezsnagit — công cụ chụp & annotate màn hình bằng C++/Qt6. Đọc `00` trước (kiến trúc & bản đồ module).
 
 | # | Spec | Module C++ | UX flow |
 |---|---|---|---|
@@ -15,14 +15,11 @@ Bộ tài liệu thiết kế để clone Snagit bằng C++/Qt6. Đọc `00` tr�
 | 08 | [Templates / Create](08-templates.md) | `ezsnag_templates` | [flow](ux-flows/06-library-share-templates-flow.md) |
 | 09 | [File Formats (.ezsnagx)](09-file-formats.md) | `ezsnag_canvas`, `ezsnag_library` | — |
 | 10 | [Preferences & Hotkeys](10-preferences-hotkeys.md) | `ui` | — |
-| 11 | [Platform & Phạm vi clone](11-platform-editions.md) | — | — |
+| 11 | [Nền tảng & Phạm vi](11-platform-editions.md) | — | — |
 | 12 | [Non-Functional Requirements & Định vị](12-non-functional-requirements.md) ⭐ | (xuyên suốt) | — |
 
-> ⭐ **Đọc kèm [REVIEW.md](../REVIEW.md)** — review phản biện toàn bộ spec ↔ research, đã áp vào ROADMAP v2 + SPEC 12.
-> Tóm tắt: MVP định nghĩa lại theo **workflow** (bug-report loop + doc-steps loop), kéo hotkey/Quick Styles/Repeat-Last
-> lên MVP, DPI/đa màn hình + Library backup là nền bắt buộc, Smart Move/inpaint gate sau spike.
-
-**Research thô**: `../research/` — `01–05` (docs chính thức TechSmith) + `06–09` (forum/cộng đồng/đối thủ/review/workflow).
+> **MVP định nghĩa theo workflow** (bug-report loop + doc-steps loop): kéo hotkey/Quick Styles/Repeat-Last
+> lên MVP; DPI/đa màn hình + Library backup là nền bắt buộc; Smart Move/inpaint gate sau spike. Xem `ROADMAP.md`.
 
 **Quy ước:** spec viết tiếng Việt có dấu, giữ tên feature + thuật ngữ kỹ thuật tiếng Anh. Mỗi feature ghi
-Mô tả / Tùy chọn / Ưu tiên (theo phase roadmap) / Ghi chú clone C++/Qt. Mục "Điểm chưa chắc" = cần verify trên app thật.
+Mô tả / Tùy chọn / Ưu tiên (theo phase roadmap) / Ghi chú kỹ thuật C++/Qt. Mục "Điểm chưa chắc" = cần verify trên app thật.
